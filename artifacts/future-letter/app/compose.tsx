@@ -5,8 +5,10 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -60,7 +62,11 @@ export default function ComposeScreen() {
   };
 
   return (
-    <View style={[styles.container, { paddingTop: Platform.OS === "web" ? 67 : 0 }]}>
+    <KeyboardAvoidingView
+      style={[styles.container, { paddingTop: Platform.OS === "web" ? 67 : 0 }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+    >
       <View style={[styles.modalHandle, Platform.OS === "web" && { marginTop: 8 }]}>
         <View style={styles.handleBar} />
       </View>
@@ -117,12 +123,17 @@ export default function ComposeScreen() {
         </Text>
       </View>
 
-      <View style={styles.chatArea}>
+      <ScrollView
+        style={styles.chatArea}
+        contentContainerStyle={styles.chatAreaContent}
+        keyboardDismissMode="interactive"
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.previewBubble}>
           <TextInput
             style={styles.textInput}
             placeholder="Type a message to future you..."
-            placeholderTextColor={Colors.light.textTertiary}
+            placeholderTextColor="rgba(255,255,255,0.55)"
             multiline
             textAlignVertical="top"
             maxLength={5000}
@@ -134,7 +145,7 @@ export default function ComposeScreen() {
         {content.length > 0 && (
           <Text style={styles.charCount}>{content.length} / 5,000</Text>
         )}
-      </View>
+      </ScrollView>
 
       {error && (
         <View style={styles.errorContainer}>
@@ -143,7 +154,10 @@ export default function ComposeScreen() {
         </View>
       )}
 
-      <View style={[styles.inputBar, { paddingBottom: insets.bottom + (Platform.OS === "web" ? 34 : 12) }]}>
+      <View style={[styles.inputBar, { paddingBottom: Platform.OS === "web" ? insets.bottom + 34 : Math.max(insets.bottom, 8) }]}>
+        <Text style={styles.inputBarLabel}>
+          Arrives {formattedDelivery}
+        </Text>
         <Pressable
           onPress={handleSend}
           disabled={!canSend}
@@ -160,7 +174,7 @@ export default function ComposeScreen() {
           )}
         </Pressable>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -237,8 +251,11 @@ const styles = StyleSheet.create({
   },
   chatArea: {
     flex: 1,
+  },
+  chatAreaContent: {
     paddingHorizontal: 16,
     paddingTop: 16,
+    paddingBottom: 8,
   },
   previewBubble: {
     backgroundColor: Colors.light.tint,
@@ -254,7 +271,7 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_400Regular",
     color: "#fff",
     lineHeight: 24,
-    minHeight: 100,
+    minHeight: 80,
     paddingTop: 0,
   },
   charCount: {
@@ -282,9 +299,16 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-end",
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: Colors.light.borderLight,
+    gap: 12,
+  },
+  inputBarLabel: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textTertiary,
+    flex: 1,
   },
   sendButton: {
     width: 48,
