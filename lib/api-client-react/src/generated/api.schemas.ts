@@ -8,3 +8,112 @@
 export interface HealthStatus {
   status: string;
 }
+
+export interface AuthUser {
+  id: string;
+  /** @nullable */
+  email: string | null;
+  /** @nullable */
+  firstName: string | null;
+  /** @nullable */
+  lastName: string | null;
+  /** @nullable */
+  profileImageUrl: string | null;
+}
+
+export interface AuthUserEnvelope {
+  user: AuthUser | null;
+}
+
+export interface MobileTokenExchangeRequest {
+  /** @minLength 1 */
+  code: string;
+  /** @minLength 1 */
+  code_verifier: string;
+  /** @minLength 1 */
+  redirect_uri: string;
+  /** @minLength 1 */
+  state: string;
+  /** @minLength 1 */
+  nonce?: string;
+}
+
+export interface MobileTokenExchangeSuccess {
+  token: string;
+}
+
+export const LogoutSuccessValue = {
+  success: true,
+} as const;
+export type LogoutSuccess = typeof LogoutSuccessValue;
+
+export interface ErrorEnvelope {
+  error: string;
+}
+
+export type MessageFrequency =
+  (typeof MessageFrequency)[keyof typeof MessageFrequency];
+
+export const MessageFrequency = {
+  yearly: "yearly",
+  biannual: "biannual",
+} as const;
+
+export interface Message {
+  id: number;
+  userId: string;
+  content: string;
+  frequency: MessageFrequency;
+  createdAt: string;
+  deliverAt: string;
+  isDelivered: boolean;
+  isRead: boolean;
+}
+
+export type CreateMessageRequestFrequency =
+  (typeof CreateMessageRequestFrequency)[keyof typeof CreateMessageRequestFrequency];
+
+export const CreateMessageRequestFrequency = {
+  yearly: "yearly",
+  biannual: "biannual",
+} as const;
+
+export interface CreateMessageRequest {
+  /**
+   * @minLength 1
+   * @maxLength 5000
+   */
+  content: string;
+  frequency: CreateMessageRequestFrequency;
+}
+
+export interface MessagesResponse {
+  messages: Message[];
+}
+
+export interface MessageResponse {
+  message: Message;
+}
+
+export const DeleteMessageResponseValue = {
+  success: true,
+} as const;
+export type DeleteMessageResponse = typeof DeleteMessageResponseValue;
+
+/**
+ * Opaque session token — `Bearer <sid>`.
+ */
+export type AuthorizationSessionHeaderParameter = string;
+
+export type BeginBrowserLoginParams = {
+  /**
+   * Relative path to redirect to after login (must start with `/`). Defaults to `/`.
+   */
+  returnTo?: string;
+};
+
+export type HandleBrowserLoginCallbackParams = {
+  code?: string;
+  state?: string;
+  iss?: string;
+};

@@ -1,0 +1,27 @@
+kind = "mobile"
+previewPath = "/"
+title = "Future Letter"
+version = "1.0.0"
+id = "artifacts/future-letter"
+router = "expo-domain"
+
+[[integratedSkills]]
+name = "expo"
+version = "1.0.0"
+
+[[services]]
+ensurePreviewReachable = "/status"
+localPort = 21633
+name = "expo"
+paths = ["/"]
+
+[services.development]
+run = "pnpm --filter @workspace/future-letter run dev"
+
+[services.env]
+PORT = "21633"
+BASE_PATH = "/"
+
+[services.production]
+build = ["pnpm", "--filter", "@workspace/future-letter", "run", "build"]
+run = ["pnpm", "--filter", "@workspace/future-letter", "run", "serve"]
