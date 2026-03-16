@@ -7,7 +7,6 @@ import {
   ActivityIndicator,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -28,7 +27,6 @@ export default function ComposeScreen() {
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const deliveryLabel = frequency === "biannual" ? "6 months from now" : "1 year from now";
   const deliveryDate = new Date();
   if (frequency === "biannual") {
     deliveryDate.setMonth(deliveryDate.getMonth() + 6);
@@ -36,8 +34,7 @@ export default function ComposeScreen() {
     deliveryDate.setFullYear(deliveryDate.getFullYear() + 1);
   }
   const formattedDelivery = deliveryDate.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
+    month: "short",
     day: "numeric",
     year: "numeric",
   });
@@ -72,97 +69,59 @@ export default function ComposeScreen() {
         <Pressable onPress={() => router.back()} style={styles.closeButton}>
           <Feather name="x" size={22} color={Colors.light.textSecondary} />
         </Pressable>
-        <Text style={styles.topBarTitle}>New Letter</Text>
-        <Pressable
-          onPress={handleSend}
-          disabled={!canSend}
-          style={({ pressed }) => [
-            styles.sendButton,
-            !canSend && styles.sendButtonDisabled,
-            pressed && canSend && styles.sendButtonPressed,
-          ]}
-        >
-          {isSending ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Text style={[styles.sendButtonText, !canSend && styles.sendButtonTextDisabled]}>
-              Send
-            </Text>
-          )}
-        </Pressable>
+        <Text style={styles.topBarTitle}>New Message</Text>
+        <View style={{ width: 36 }} />
       </View>
 
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + (Platform.OS === "web" ? 34 : 16) }]}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.deliveryInfo}>
-          <Feather name="calendar" size={16} color={Colors.light.tint} />
-          <Text style={styles.deliveryText}>
-            Opens on <Text style={styles.deliveryDate}>{formattedDelivery}</Text>
+      <View style={styles.frequencyRow}>
+        <Pressable
+          onPress={() => {
+            setFrequency("biannual");
+            if (Platform.OS !== "web") Haptics.selectionAsync();
+          }}
+          style={[
+            styles.freqChip,
+            frequency === "biannual" && styles.freqChipSelected,
+          ]}
+        >
+          <Text
+            style={[
+              styles.freqChipText,
+              frequency === "biannual" && styles.freqChipTextSelected,
+            ]}
+          >
+            6 months
           </Text>
-        </View>
+        </Pressable>
+        <Pressable
+          onPress={() => {
+            setFrequency("yearly");
+            if (Platform.OS !== "web") Haptics.selectionAsync();
+          }}
+          style={[
+            styles.freqChip,
+            frequency === "yearly" && styles.freqChipSelected,
+          ]}
+        >
+          <Text
+            style={[
+              styles.freqChipText,
+              frequency === "yearly" && styles.freqChipTextSelected,
+            ]}
+          >
+            1 year
+          </Text>
+        </Pressable>
+        <Text style={styles.deliveryLabel}>
+          <Feather name="clock" size={12} color={Colors.light.textTertiary} /> {formattedDelivery}
+        </Text>
+      </View>
 
-        <View style={styles.frequencyContainer}>
-          <Text style={styles.frequencyLabel}>Deliver in</Text>
-          <View style={styles.frequencyOptions}>
-            <Pressable
-              onPress={() => {
-                setFrequency("biannual");
-                if (Platform.OS !== "web") Haptics.selectionAsync();
-              }}
-              style={[
-                styles.frequencyOption,
-                frequency === "biannual" && styles.frequencyOptionSelected,
-              ]}
-            >
-              <Feather
-                name="clock"
-                size={16}
-                color={frequency === "biannual" ? Colors.light.tint : Colors.light.textSecondary}
-              />
-              <Text
-                style={[
-                  styles.frequencyOptionText,
-                  frequency === "biannual" && styles.frequencyOptionTextSelected,
-                ]}
-              >
-                6 Months
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                setFrequency("yearly");
-                if (Platform.OS !== "web") Haptics.selectionAsync();
-              }}
-              style={[
-                styles.frequencyOption,
-                frequency === "yearly" && styles.frequencyOptionSelected,
-              ]}
-            >
-              <Feather
-                name="calendar"
-                size={16}
-                color={frequency === "yearly" ? Colors.light.tint : Colors.light.textSecondary}
-              />
-              <Text
-                style={[
-                  styles.frequencyOptionText,
-                  frequency === "yearly" && styles.frequencyOptionTextSelected,
-                ]}
-              >
-                1 Year
-              </Text>
-            </Pressable>
-          </View>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <Text style={styles.promptText}>Dear future me,</Text>
+      <View style={styles.chatArea}>
+        <View style={styles.previewBubble}>
           <TextInput
             style={styles.textInput}
-            placeholder="What do you want to tell your future self?"
+            placeholder="Type a message to future you..."
             placeholderTextColor={Colors.light.textTertiary}
             multiline
             textAlignVertical="top"
@@ -172,18 +131,35 @@ export default function ComposeScreen() {
             autoFocus
           />
         </View>
-
-        {error && (
-          <View style={styles.errorContainer}>
-            <Feather name="alert-circle" size={14} color={Colors.light.danger} />
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
+        {content.length > 0 && (
+          <Text style={styles.charCount}>{content.length} / 5,000</Text>
         )}
+      </View>
 
-        <Text style={styles.charCount}>
-          {content.length} / 5,000
-        </Text>
-      </ScrollView>
+      {error && (
+        <View style={styles.errorContainer}>
+          <Feather name="alert-circle" size={14} color={Colors.light.danger} />
+          <Text style={styles.errorText}>{error}</Text>
+        </View>
+      )}
+
+      <View style={[styles.inputBar, { paddingBottom: insets.bottom + (Platform.OS === "web" ? 34 : 12) }]}>
+        <Pressable
+          onPress={handleSend}
+          disabled={!canSend}
+          style={({ pressed }) => [
+            styles.sendButton,
+            !canSend && styles.sendButtonDisabled,
+            pressed && canSend && { transform: [{ scale: 0.92 }] },
+          ]}
+        >
+          {isSending ? (
+            <ActivityIndicator size="small" color="#fff" />
+          ) : (
+            <Feather name="send" size={20} color={canSend ? "#fff" : Colors.light.textTertiary} />
+          )}
+        </Pressable>
+      </View>
     </View>
   );
 }
@@ -226,125 +202,99 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_600SemiBold",
     color: Colors.light.text,
   },
-  sendButton: {
-    backgroundColor: Colors.light.tint,
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 20,
-  },
-  sendButtonDisabled: {
-    backgroundColor: Colors.light.backgroundSecondary,
-  },
-  sendButtonPressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.96 }],
-  },
-  sendButtonText: {
-    fontSize: 14,
-    fontFamily: "Inter_600SemiBold",
-    color: "#fff",
-  },
-  sendButtonTextDisabled: {
-    color: Colors.light.textTertiary,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  deliveryInfo: {
+  frequencyRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    backgroundColor: Colors.light.tintLight,
-    paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 20,
-  },
-  deliveryText: {
-    fontSize: 13,
-    fontFamily: "Inter_400Regular",
-    color: Colors.light.textSecondary,
-  },
-  deliveryDate: {
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.light.tint,
-  },
-  frequencyContainer: {
-    marginBottom: 24,
-  },
-  frequencyLabel: {
-    fontSize: 13,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.light.textSecondary,
-    textTransform: "uppercase",
-    letterSpacing: 0.8,
-    marginBottom: 10,
-  },
-  frequencyOptions: {
-    flexDirection: "row",
-    gap: 10,
-  },
-  frequencyOption: {
-    flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
+    paddingVertical: 12,
     gap: 8,
-    paddingVertical: 14,
-    borderRadius: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.borderLight,
+  },
+  freqChip: {
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
     backgroundColor: Colors.light.backgroundSecondary,
-    borderWidth: 1.5,
-    borderColor: "transparent",
   },
-  frequencyOptionSelected: {
+  freqChipSelected: {
     backgroundColor: Colors.light.tintLight,
-    borderColor: Colors.light.tint,
   },
-  frequencyOptionText: {
-    fontSize: 15,
+  freqChipText: {
+    fontSize: 13,
     fontFamily: "Inter_500Medium",
     color: Colors.light.textSecondary,
   },
-  frequencyOptionTextSelected: {
+  freqChipTextSelected: {
     color: Colors.light.tint,
     fontFamily: "Inter_600SemiBold",
   },
-  inputContainer: {
-    marginBottom: 16,
+  deliveryLabel: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textTertiary,
+    marginLeft: "auto" as const,
   },
-  promptText: {
-    fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.light.text,
-    marginBottom: 12,
+  chatArea: {
+    flex: 1,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  previewBubble: {
+    backgroundColor: Colors.light.tint,
+    borderRadius: 18,
+    borderBottomRightRadius: 6,
+    padding: 14,
+    alignSelf: "flex-end",
+    maxWidth: "88%",
+    minWidth: "60%",
   },
   textInput: {
     fontSize: 16,
     fontFamily: "Inter_400Regular",
-    color: Colors.light.text,
-    lineHeight: 26,
-    minHeight: 200,
+    color: "#fff",
+    lineHeight: 24,
+    minHeight: 100,
     paddingTop: 0,
+  },
+  charCount: {
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textTertiary,
+    textAlign: "right",
+    marginTop: 8,
+    paddingRight: 4,
   },
   errorContainer: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
-    marginBottom: 12,
+    paddingHorizontal: 20,
+    paddingBottom: 8,
   },
   errorText: {
     fontSize: 13,
     fontFamily: "Inter_500Medium",
     color: Colors.light.danger,
   },
-  charCount: {
-    fontSize: 12,
-    fontFamily: "Inter_400Regular",
-    color: Colors.light.textTertiary,
-    textAlign: "right",
+  inputBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: Colors.light.borderLight,
+  },
+  sendButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.light.tint,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  sendButtonDisabled: {
+    backgroundColor: Colors.light.backgroundSecondary,
   },
 });

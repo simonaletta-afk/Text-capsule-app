@@ -28,88 +28,104 @@ function formatRelativeDate(dateStr: string): string {
     const absDays = Math.abs(days);
     if (absDays === 0) return "Today";
     if (absDays === 1) return "Yesterday";
-    if (absDays < 30) return `${absDays} days ago`;
+    if (absDays < 30) return `${absDays}d ago`;
     const months = Math.floor(absDays / 30);
-    if (months < 12) return `${months} month${months > 1 ? "s" : ""} ago`;
+    if (months < 12) return `${months}mo ago`;
     const years = Math.floor(months / 12);
-    return `${years} year${years > 1 ? "s" : ""} ago`;
+    return `${years}y ago`;
   }
 
   if (days === 0) return "Today";
   if (days === 1) return "Tomorrow";
-  if (days < 30) return `In ${days} days`;
+  if (days < 30) return `In ${days}d`;
   const months = Math.floor(days / 30);
-  if (months < 12) return `In ${months} month${months > 1 ? "s" : ""}`;
+  if (months < 12) return `In ${months}mo`;
   const years = Math.floor(months / 12);
   const remainingMonths = months % 12;
-  if (remainingMonths === 0) return `In ${years} year${years > 1 ? "s" : ""}`;
-  return `In ${years}y ${remainingMonths}m`;
+  if (remainingMonths === 0) return `In ${years}y`;
+  return `In ${years}y ${remainingMonths}mo`;
 }
 
-function formatDate(dateStr: string): string {
+function formatTime(dateStr: string): string {
   const date = new Date(dateStr);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
   });
 }
 
-function DeliveredMessageCard({ message }: { message: Message }) {
+function formatDateLabel(dateStr: string): string {
+  const date = new Date(dateStr);
+  const now = new Date();
+  const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return "Today";
+  if (diffDays === 1) return "Yesterday";
+  if (diffDays < 7) {
+    return date.toLocaleDateString("en-US", { weekday: "long" });
+  }
+  return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function DeliveredMessageBubble({ message }: { message: Message }) {
   const isUnread = !message.isRead;
 
   return (
     <Pressable
       onPress={() => router.push({ pathname: "/message/[id]", params: { id: message.id.toString() } })}
-      style={({ pressed }) => [
-        styles.card,
-        isUnread && styles.cardUnread,
-        pressed && styles.cardPressed,
-      ]}
+      style={({ pressed }) => [pressed && { opacity: 0.7 }]}
     >
-      <View style={styles.cardHeader}>
-        <View style={[styles.statusDot, isUnread ? styles.statusDotUnread : styles.statusDotRead]} />
-        <Text style={[styles.cardDate, isUnread && styles.cardDateUnread]}>
-          {formatDate(message.createdAt)}
-        </Text>
-        {isUnread && (
-          <View style={styles.newBadge}>
-            <Text style={styles.newBadgeText}>NEW</Text>
+      <View style={styles.bubbleRow}>
+        <View style={[styles.bubble, styles.bubbleSent]}>
+          <Text style={styles.bubbleText}>{message.content}</Text>
+          <View style={styles.bubbleMeta}>
+            <Text style={styles.bubbleTime}>{formatTime(message.createdAt)}</Text>
+            <Feather name="check-circle" size={12} color="rgba(255,255,255,0.6)" />
           </View>
-        )}
+        </View>
       </View>
-      <Text style={styles.cardContent} numberOfLines={3}>
-        {message.content}
-      </Text>
-      <View style={styles.cardFooter}>
-        <Feather name="clock" size={13} color={Colors.light.textTertiary} />
-        <Text style={styles.cardFooterText}>
-          Sent {formatRelativeDate(message.createdAt)}
-        </Text>
+
+      <View style={styles.deliveredRow}>
+        <View style={[styles.bubble, styles.bubbleReceived]}>
+          {isUnread ? (
+            <View style={styles.unreadIndicator}>
+              <View style={styles.unreadDot} />
+              <Text style={styles.deliveredLabel}>New message from past you</Text>
+            </View>
+          ) : (
+            <Text style={styles.deliveredLabel}>Delivered {formatRelativeDate(message.deliverAt)}</Text>
+          )}
+          <Text style={styles.bubbleTextReceived} numberOfLines={isUnread ? 2 : 3}>{message.content}</Text>
+          <View style={styles.bubbleMetaReceived}>
+            <Text style={styles.bubbleTimeReceived}>{formatRelativeDate(message.deliverAt)}</Text>
+            {isUnread && (
+              <View style={styles.tapToRead}>
+                <Text style={styles.tapToReadText}>Tap to read</Text>
+                <Feather name="chevron-right" size={12} color={Colors.light.tint} />
+              </View>
+            )}
+          </View>
+        </View>
       </View>
     </Pressable>
   );
 }
 
-function PendingMessageCard({ message }: { message: Message }) {
+function PendingMessageBubble({ message }: { message: Message }) {
   return (
-    <View style={[styles.card, styles.cardPending]}>
-      <View style={styles.cardHeader}>
-        <View style={[styles.statusDot, styles.statusDotPending]} />
-        <Text style={styles.cardDate}>
-          {message.frequency === "biannual" ? "6 months" : "1 year"}
-        </Text>
+    <View style={styles.bubbleRow}>
+      <View style={[styles.bubble, styles.bubbleSent]}>
+        <Text style={styles.bubbleText}>{message.content}</Text>
+        <View style={styles.bubbleMeta}>
+          <Text style={styles.bubbleTime}>{formatTime(message.createdAt)}</Text>
+          <Feather name="clock" size={12} color="rgba(255,255,255,0.6)" />
+        </View>
       </View>
-      <View style={styles.pendingContent}>
-        <Feather name="lock" size={16} color={Colors.light.textTertiary} />
-        <Text style={styles.pendingText}>
+      <View style={styles.pendingBadge}>
+        <Feather name="clock" size={11} color={Colors.light.accent} />
+        <Text style={styles.pendingBadgeText}>
           Opens {formatRelativeDate(message.deliverAt)}
-        </Text>
-      </View>
-      <View style={styles.cardFooter}>
-        <Feather name="send" size={13} color={Colors.light.textTertiary} />
-        <Text style={styles.cardFooterText}>
-          Written {formatDate(message.createdAt)}
         </Text>
       </View>
     </View>
@@ -125,12 +141,12 @@ function LoginScreen() {
       <View style={styles.loginContainer}>
         <View style={styles.logoContainer}>
           <View style={styles.logoCircle}>
-            <Feather name="mail" size={32} color={Colors.light.tint} />
+            <Feather name="message-circle" size={32} color={Colors.light.tint} />
           </View>
         </View>
-        <Text style={styles.loginTitle}>Future Letter</Text>
+        <Text style={styles.loginTitle}>Future Text</Text>
         <Text style={styles.loginSubtitle}>
-          Write a message to your future self. Open it in 6 months or a year.
+          Send a message to your future self. Get it back in 6 months or a year.
         </Text>
         <Pressable
           onPress={login}
@@ -187,19 +203,12 @@ export default function HomeScreen() {
 
   const hasMessages = (messages?.length ?? 0) > 0;
 
-  const renderItem = ({ item, section }: { item: Message; section: string }) => {
-    if (section === "delivered") {
-      return <DeliveredMessageCard message={item} />;
-    }
-    return <PendingMessageCard message={item} />;
-  };
-
   const sections: { key: string; title: string; data: Message[] }[] = [];
   if (delivered.length > 0) {
-    sections.push({ key: "delivered", title: unreadCount > 0 ? `Delivered (${unreadCount} new)` : "Delivered", data: delivered });
+    sections.push({ key: "delivered", title: unreadCount > 0 ? `${unreadCount} new` : "Delivered", data: delivered });
   }
   if (pending.length > 0) {
-    sections.push({ key: "pending", title: "Waiting to be opened", data: pending });
+    sections.push({ key: "pending", title: "Scheduled", data: pending });
   }
 
   const flatData: { type: "header" | "item"; key: string; title?: string; message?: Message; section?: string }[] = [];
@@ -214,10 +223,12 @@ export default function HomeScreen() {
     <View style={[styles.container, { paddingTop: insets.top + (Platform.OS === "web" ? 67 : 0) }]}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.greeting}>
-            {user?.firstName ? `Hi, ${user.firstName}` : "Hi there"}
+          <Text style={styles.headerTitle}>Future Text</Text>
+          <Text style={styles.headerSub}>
+            {hasMessages
+              ? `${messages?.length} message${(messages?.length ?? 0) > 1 ? "s" : ""}`
+              : "No messages yet"}
           </Text>
-          <Text style={styles.headerTitle}>Your Letters</Text>
         </View>
         <Pressable
           onPress={() => router.push("/compose")}
@@ -236,12 +247,19 @@ export default function HomeScreen() {
         </View>
       ) : !hasMessages ? (
         <View style={styles.emptyState}>
-          <View style={styles.emptyIcon}>
-            <Feather name="inbox" size={40} color={Colors.light.textTertiary} />
+          <View style={styles.emptyBubbles}>
+            <View style={[styles.emptyBubble, styles.emptyBubbleLeft]}>
+              <Text style={styles.emptyBubbleText}>Hey future me...</Text>
+            </View>
+            <View style={[styles.emptyBubble, styles.emptyBubbleRight]}>
+              <Text style={styles.emptyBubbleTextRight}>
+                <Feather name="clock" size={13} color={Colors.light.textTertiary} /> Opens in 1 year
+              </Text>
+            </View>
           </View>
-          <Text style={styles.emptyTitle}>No letters yet</Text>
+          <Text style={styles.emptyTitle}>Send your first text</Text>
           <Text style={styles.emptySubtitle}>
-            Write your first message to your future self
+            Write a message to your future self. You'll get it back later.
           </Text>
           <Pressable
             onPress={() => router.push("/compose")}
@@ -250,8 +268,8 @@ export default function HomeScreen() {
               pressed && { opacity: 0.8 },
             ]}
           >
-            <Feather name="edit" size={16} color={Colors.light.tint} />
-            <Text style={styles.emptyButtonText}>Write a Letter</Text>
+            <Feather name="message-circle" size={16} color={Colors.light.tint} />
+            <Text style={styles.emptyButtonText}>New Message</Text>
           </Pressable>
         </View>
       ) : (
@@ -275,8 +293,11 @@ export default function HomeScreen() {
                 </View>
               );
             }
-            if (item.message && item.section) {
-              return renderItem({ item: item.message, section: item.section });
+            if (item.message && item.section === "delivered") {
+              return <DeliveredMessageBubble message={item.message} />;
+            }
+            if (item.message && item.section === "pending") {
+              return <PendingMessageBubble message={item.message} />;
             }
             return null;
           }}
@@ -299,144 +320,149 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-end",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 16,
-  },
-  greeting: {
-    fontSize: 14,
-    fontFamily: "Inter_500Medium",
-    color: Colors.light.textSecondary,
-    marginBottom: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.borderLight,
   },
   headerTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontFamily: "Inter_700Bold",
     color: Colors.light.text,
   },
+  headerSub: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textSecondary,
+    marginTop: 2,
+  },
   composeButton: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: Colors.light.tint,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: Colors.light.tint,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
   },
   composeButtonPressed: {
     transform: [{ scale: 0.92 }],
     opacity: 0.9,
   },
   listContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
+    paddingTop: 4,
   },
   sectionHeader: {
-    paddingTop: 20,
-    paddingBottom: 10,
+    paddingTop: 16,
+    paddingBottom: 8,
+    paddingHorizontal: 4,
   },
   sectionTitle: {
-    fontSize: 13,
+    fontSize: 12,
     fontFamily: "Inter_600SemiBold",
-    color: Colors.light.textSecondary,
+    color: Colors.light.textTertiary,
     textTransform: "uppercase",
     letterSpacing: 0.8,
   },
-  card: {
+  bubbleRow: {
+    alignItems: "flex-end",
+    marginBottom: 4,
+  },
+  deliveredRow: {
+    alignItems: "flex-start",
+    marginBottom: 16,
+  },
+  bubble: {
+    maxWidth: "82%",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 18,
+  },
+  bubbleSent: {
+    backgroundColor: Colors.light.tint,
+    borderBottomRightRadius: 6,
+  },
+  bubbleReceived: {
     backgroundColor: Colors.light.card,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 10,
+    borderBottomLeftRadius: 6,
     borderWidth: 1,
     borderColor: Colors.light.border,
   },
-  cardUnread: {
-    borderColor: Colors.light.tint,
-    borderWidth: 1.5,
-    backgroundColor: "#FAFAFF",
+  bubbleText: {
+    fontSize: 15,
+    fontFamily: "Inter_400Regular",
+    color: "#fff",
+    lineHeight: 21,
   },
-  cardPending: {
-    backgroundColor: Colors.light.backgroundSecondary,
-    borderColor: Colors.light.borderLight,
-  },
-  cardPressed: {
-    opacity: 0.7,
-    transform: [{ scale: 0.98 }],
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 10,
-    gap: 8,
-  },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-  },
-  statusDotUnread: {
-    backgroundColor: Colors.light.tint,
-  },
-  statusDotRead: {
-    backgroundColor: Colors.light.success,
-  },
-  statusDotPending: {
-    backgroundColor: Colors.light.accent,
-  },
-  cardDate: {
-    fontSize: 13,
-    fontFamily: "Inter_500Medium",
-    color: Colors.light.textSecondary,
-    flex: 1,
-  },
-  cardDateUnread: {
-    color: Colors.light.tint,
-    fontFamily: "Inter_600SemiBold",
-  },
-  newBadge: {
-    backgroundColor: Colors.light.tintLight,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  newBadgeText: {
-    fontSize: 10,
-    fontFamily: "Inter_700Bold",
-    color: Colors.light.tint,
-    letterSpacing: 0.5,
-  },
-  cardContent: {
+  bubbleTextReceived: {
     fontSize: 15,
     fontFamily: "Inter_400Regular",
     color: Colors.light.text,
-    lineHeight: 22,
-    marginBottom: 10,
+    lineHeight: 21,
+    marginTop: 4,
   },
-  cardFooter: {
+  bubbleMeta: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
+    justifyContent: "flex-end",
+    gap: 4,
+    marginTop: 4,
   },
-  cardFooterText: {
-    fontSize: 12,
+  bubbleTime: {
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+    color: "rgba(255,255,255,0.6)",
+  },
+  bubbleMetaReceived: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 6,
+  },
+  bubbleTimeReceived: {
+    fontSize: 11,
     fontFamily: "Inter_400Regular",
     color: Colors.light.textTertiary,
   },
-  pendingContent: {
+  unreadIndicator: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    marginBottom: 10,
-    paddingVertical: 4,
+    gap: 6,
   },
-  pendingText: {
-    fontSize: 15,
+  unreadDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.light.tint,
+  },
+  deliveredLabel: {
+    fontSize: 11,
+    fontFamily: "Inter_600SemiBold",
+    color: Colors.light.tint,
+  },
+  tapToRead: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 2,
+  },
+  tapToReadText: {
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+    color: Colors.light.tint,
+  },
+  pendingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginTop: 4,
+    paddingHorizontal: 4,
+  },
+  pendingBadgeText: {
+    fontSize: 11,
     fontFamily: "Inter_500Medium",
-    color: Colors.light.textSecondary,
+    color: Colors.light.textTertiary,
   },
   loginContainer: {
     flex: 1,
@@ -479,11 +505,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
     borderRadius: 16,
     width: "100%",
-    shadowColor: Colors.light.tint,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
   },
   loginButtonPressed: {
     transform: [{ scale: 0.96 }],
@@ -498,16 +519,42 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 40,
+    paddingHorizontal: 32,
   },
-  emptyIcon: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+  emptyBubbles: {
+    width: "100%",
+    marginBottom: 32,
+    gap: 8,
+  },
+  emptyBubble: {
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 18,
+    maxWidth: "75%",
+  },
+  emptyBubbleLeft: {
+    backgroundColor: Colors.light.tint,
+    borderBottomRightRadius: 6,
+    alignSelf: "flex-end",
+    opacity: 0.15,
+  },
+  emptyBubbleRight: {
     backgroundColor: Colors.light.backgroundSecondary,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
+    borderBottomLeftRadius: 6,
+    alignSelf: "flex-start",
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    opacity: 0.6,
+  },
+  emptyBubbleText: {
+    fontSize: 15,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.tint,
+  },
+  emptyBubbleTextRight: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textTertiary,
   },
   emptyTitle: {
     fontSize: 20,

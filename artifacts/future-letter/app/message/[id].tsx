@@ -15,16 +15,25 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { fetchMessages, markMessageRead, deleteMessage, type Message } from "@/lib/api";
+import { fetchMessages, markMessageRead, deleteMessage } from "@/lib/api";
 import Colors from "@/constants/colors";
 
 function formatFullDate(dateStr: string): string {
   const date = new Date(dateStr);
   return date.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
+    weekday: "short",
+    month: "short",
     day: "numeric",
     year: "numeric",
+  });
+}
+
+function formatTime(dateStr: string): string {
+  const date = new Date(dateStr);
+  return date.toLocaleTimeString("en-US", {
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
   });
 }
 
@@ -42,7 +51,7 @@ function getTimeSince(dateStr: string): string {
   const years = Math.floor(months / 12);
   const rm = months % 12;
   if (rm === 0) return `${years} year${years > 1 ? "s" : ""} ago`;
-  return `${years} year${years > 1 ? "s" : ""} and ${rm} month${rm > 1 ? "s" : ""} ago`;
+  return `${years}y ${rm}mo ago`;
 }
 
 export default function MessageDetailScreen() {
@@ -80,11 +89,11 @@ export default function MessageDetailScreen() {
 
   const handleDelete = () => {
     if (Platform.OS === "web") {
-      if (confirm("Delete this letter?")) {
+      if (confirm("Delete this message?")) {
         deleteMutation.mutate();
       }
     } else {
-      Alert.alert("Delete Letter", "Are you sure you want to delete this letter?", [
+      Alert.alert("Delete Message", "Are you sure you want to delete this message?", [
         { text: "Cancel", style: "cancel" },
         {
           text: "Delete",
@@ -114,7 +123,7 @@ export default function MessageDetailScreen() {
     return (
       <View style={[styles.container, styles.center]}>
         <Feather name="alert-circle" size={32} color={Colors.light.textTertiary} />
-        <Text style={styles.notFoundText}>Letter not found</Text>
+        <Text style={styles.notFoundText}>Message not found</Text>
         <Pressable onPress={() => router.back()} style={styles.backLink}>
           <Text style={styles.backLinkText}>Go back</Text>
         </Pressable>
@@ -130,11 +139,14 @@ export default function MessageDetailScreen() {
 
       <View style={styles.topBar}>
         <Pressable onPress={() => router.back()} style={styles.closeButton}>
-          <Feather name="x" size={22} color={Colors.light.textSecondary} />
+          <Feather name="chevron-left" size={22} color={Colors.light.textSecondary} />
         </Pressable>
-        <Text style={styles.topBarTitle}>Your Letter</Text>
+        <View style={styles.topBarCenter}>
+          <Text style={styles.topBarTitle}>Past You</Text>
+          <Text style={styles.topBarSub}>{getTimeSince(message.createdAt)}</Text>
+        </View>
         <Pressable onPress={handleDelete} style={styles.deleteButton}>
-          <Feather name="trash-2" size={18} color={Colors.light.danger} />
+          <Feather name="trash-2" size={16} color={Colors.light.danger} />
         </Pressable>
       </View>
 
@@ -143,70 +155,67 @@ export default function MessageDetailScreen() {
         contentContainerStyle={[styles.scrollContent, { paddingBottom: insets.bottom + (Platform.OS === "web" ? 34 : 32) }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.metaContainer}>
-          <View style={styles.metaRow}>
-            <View style={styles.metaIcon}>
-              <Feather name="edit-3" size={14} color={Colors.light.tint} />
-            </View>
-            <View>
-              <Text style={styles.metaLabel}>Written</Text>
-              <Text style={styles.metaValue}>{formatFullDate(message.createdAt)}</Text>
-            </View>
-          </View>
-          <View style={styles.metaDivider} />
-          <View style={styles.metaRow}>
-            <View style={styles.metaIcon}>
-              <Feather name="clock" size={14} color={Colors.light.accent} />
-            </View>
-            <View>
-              <Text style={styles.metaLabel}>
-                {message.isDelivered ? "Delivered" : "Delivers"}
-              </Text>
-              <Text style={styles.metaValue}>{formatFullDate(message.deliverAt)}</Text>
-            </View>
-          </View>
-          <View style={styles.metaDivider} />
-          <View style={styles.metaRow}>
-            <View style={styles.metaIcon}>
-              <Feather name="repeat" size={14} color={Colors.light.success} />
-            </View>
-            <View>
-              <Text style={styles.metaLabel}>Frequency</Text>
-              <Text style={styles.metaValue}>
-                {message.frequency === "biannual" ? "Every 6 months" : "Every year"}
-              </Text>
+        <View style={styles.dateDivider}>
+          <View style={styles.dateLine} />
+          <Text style={styles.dateText}>{formatFullDate(message.createdAt)}</Text>
+          <View style={styles.dateLine} />
+        </View>
+
+        <View style={styles.sentBubbleRow}>
+          <View style={[styles.bubble, styles.bubbleSent]}>
+            <Text style={styles.bubbleText}>{message.content}</Text>
+            <View style={styles.bubbleMeta}>
+              <Text style={styles.bubbleTime}>{formatTime(message.createdAt)}</Text>
+              <Feather name="check-circle" size={12} color="rgba(255,255,255,0.6)" />
             </View>
           </View>
         </View>
 
         {message.isDelivered && (
-          <View style={styles.deliveredBanner}>
-            <Feather name="mail" size={18} color={Colors.light.tint} />
-            <Text style={styles.deliveredText}>
-              You wrote this {getTimeSince(message.createdAt)}
-            </Text>
-          </View>
+          <>
+            <View style={styles.dateDivider}>
+              <View style={styles.dateLine} />
+              <Text style={styles.dateText}>
+                {formatFullDate(message.deliverAt)}
+              </Text>
+              <View style={styles.dateLine} />
+            </View>
+
+            <View style={styles.receivedBubbleRow}>
+              <View style={[styles.bubble, styles.bubbleReceived]}>
+                <View style={styles.receivedHeader}>
+                  <Feather name="clock" size={13} color={Colors.light.tint} />
+                  <Text style={styles.receivedLabel}>
+                    Message from {getTimeSince(message.createdAt)}
+                  </Text>
+                </View>
+                <Text style={styles.bubbleTextReceived}>{message.content}</Text>
+                <View style={styles.bubbleMetaReceived}>
+                  <Text style={styles.bubbleTimeReceived}>
+                    {message.frequency === "biannual" ? "6 month" : "1 year"} delivery
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </>
         )}
 
-        <View style={styles.letterContainer}>
-          <Text style={styles.letterGreeting}>Dear future me,</Text>
-          <Text style={styles.letterContent}>{message.content}</Text>
-          <Text style={styles.letterSign}>
-            — Past You, {new Date(message.createdAt).toLocaleDateString("en-US", { month: "long", year: "numeric" })}
-          </Text>
-        </View>
-
         {message.isDelivered && (
-          <Pressable
-            onPress={handleWriteAnother}
-            style={({ pressed }) => [
-              styles.writeAnotherButton,
-              pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
-            ]}
-          >
-            <Feather name="edit" size={18} color="#fff" />
-            <Text style={styles.writeAnotherText}>Write Another Letter</Text>
-          </Pressable>
+          <View style={styles.ctaContainer}>
+            <Text style={styles.ctaPrompt}>
+              Ready to send another message to future you?
+            </Text>
+            <Pressable
+              onPress={handleWriteAnother}
+              style={({ pressed }) => [
+                styles.ctaButton,
+                pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] },
+              ]}
+            >
+              <Feather name="message-circle" size={18} color="#fff" />
+              <Text style={styles.ctaButtonText}>Send Another</Text>
+            </Pressable>
+          </View>
         )}
       </ScrollView>
     </View>
@@ -252,10 +261,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  topBarCenter: {
+    alignItems: "center",
+  },
   topBarTitle: {
     fontSize: 16,
     fontFamily: "Inter_600SemiBold",
     color: Colors.light.text,
+  },
+  topBarSub: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textTertiary,
   },
   deleteButton: {
     width: 36,
@@ -269,105 +286,119 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
-  metaContainer: {
-    backgroundColor: Colors.light.card,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: Colors.light.border,
-  },
-  metaRow: {
+  dateDivider: {
     flexDirection: "row",
     alignItems: "center",
     gap: 12,
-    paddingVertical: 4,
+    marginVertical: 16,
   },
-  metaIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: Colors.light.backgroundSecondary,
-    justifyContent: "center",
-    alignItems: "center",
+  dateLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: Colors.light.borderLight,
   },
-  metaLabel: {
+  dateText: {
     fontSize: 12,
     fontFamily: "Inter_500Medium",
     color: Colors.light.textTertiary,
-    marginBottom: 1,
   },
-  metaValue: {
-    fontSize: 14,
-    fontFamily: "Inter_500Medium",
-    color: Colors.light.text,
+  sentBubbleRow: {
+    alignItems: "flex-end",
+    marginBottom: 4,
   },
-  metaDivider: {
-    height: 1,
-    backgroundColor: Colors.light.borderLight,
-    marginVertical: 10,
-    marginLeft: 44,
+  receivedBubbleRow: {
+    alignItems: "flex-start",
+    marginBottom: 4,
   },
-  deliveredBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    backgroundColor: Colors.light.tintLight,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 20,
+  bubble: {
+    maxWidth: "85%",
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 18,
   },
-  deliveredText: {
-    fontSize: 14,
-    fontFamily: "Inter_500Medium",
-    color: Colors.light.tint,
+  bubbleSent: {
+    backgroundColor: Colors.light.tint,
+    borderBottomRightRadius: 6,
   },
-  letterContainer: {
+  bubbleReceived: {
     backgroundColor: Colors.light.card,
-    borderRadius: 16,
-    padding: 24,
-    marginBottom: 24,
+    borderBottomLeftRadius: 6,
     borderWidth: 1,
     borderColor: Colors.light.border,
   },
-  letterGreeting: {
-    fontSize: 18,
-    fontFamily: "Inter_600SemiBold",
-    color: Colors.light.text,
-    marginBottom: 16,
+  bubbleText: {
+    fontSize: 16,
+    fontFamily: "Inter_400Regular",
+    color: "#fff",
+    lineHeight: 24,
   },
-  letterContent: {
+  bubbleTextReceived: {
     fontSize: 16,
     fontFamily: "Inter_400Regular",
     color: Colors.light.text,
-    lineHeight: 28,
-    marginBottom: 24,
+    lineHeight: 24,
+    marginTop: 6,
   },
-  letterSign: {
-    fontSize: 14,
+  bubbleMeta: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 4,
+    marginTop: 6,
+  },
+  bubbleTime: {
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+    color: "rgba(255,255,255,0.6)",
+  },
+  bubbleMetaReceived: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 6,
+  },
+  bubbleTimeReceived: {
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textTertiary,
+  },
+  receivedHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  receivedLabel: {
+    fontSize: 12,
+    fontFamily: "Inter_600SemiBold",
+    color: Colors.light.tint,
+  },
+  ctaContainer: {
+    alignItems: "center",
+    marginTop: 32,
+    paddingHorizontal: 16,
+  },
+  ctaPrompt: {
+    fontSize: 15,
     fontFamily: "Inter_500Medium",
     color: Colors.light.textSecondary,
-    fontStyle: "italic",
+    textAlign: "center",
+    marginBottom: 16,
+    lineHeight: 22,
   },
-  writeAnotherButton: {
+  ctaButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: 10,
     backgroundColor: Colors.light.tint,
     paddingVertical: 16,
+    paddingHorizontal: 28,
     borderRadius: 16,
-    shadowColor: Colors.light.tint,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    width: "100%",
   },
-  writeAnotherText: {
+  ctaButtonText: {
     fontSize: 16,
     fontFamily: "Inter_600SemiBold",
     color: "#fff",
