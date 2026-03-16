@@ -59,7 +59,7 @@ export async function getTwilioClient() {
 
 export async function getTwilioFromPhoneNumber() {
   const { phoneNumber } = await getCredentials();
-  return phoneNumber;
+  return phoneNumber || process.env.TWILIO_PHONE_NUMBER || "";
 }
 
 export async function sendWhatsApp(to: string, body: string) {
