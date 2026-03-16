@@ -55,28 +55,31 @@ Every package extends `tsconfig.base.json` which sets `composite: true`. The roo
 
 ### `artifacts/api-server` (`@workspace/api-server`)
 
-Express 5 API server with Replit Auth and messages API.
+Express 5 API server with Replit Auth, messages API, and Twilio SMS delivery.
 
-- Entry: `src/index.ts` — reads `PORT`, starts Express
+- Entry: `src/index.ts` — reads `PORT`, starts Express, starts SMS delivery scheduler
 - App setup: `src/app.ts` — mounts CORS, cookie-parser, JSON parsing, auth middleware, routes at `/api`
-- Routes: health, auth (Replit OIDC), messages (CRUD)
+- Routes: health, auth (Replit OIDC), messages (CRUD), phone (GET/POST phone number)
 - Auth: `src/lib/auth.ts` (session mgmt), `src/middlewares/authMiddleware.ts`
-- Depends on: `@workspace/db`, `@workspace/api-zod`
+- Twilio: `src/lib/twilio.ts` (Twilio client via Replit integration connector)
+- SMS Delivery: `src/lib/deliveryJob.ts` — polls every 60s for messages past their delivery date, sends SMS via Twilio, marks as delivered
+- Depends on: `@workspace/db`, `@workspace/api-zod`, `twilio`
 
 ### `artifacts/future-letter` (`@workspace/future-letter`)
 
-Expo React Native mobile app — "Future Letter". Users write messages to their future selves, delivered after 6 months or 1 year.
+Expo React Native mobile app — "Text Capsule". Users write messages to their future selves, delivered as SMS after 6 months or 1 year.
 
 - Uses Expo Router for file-based routing
 - Auth via `lib/auth.tsx` (expo-auth-session + SecureStore)
 - API client in `lib/api.ts`
-- Screens: index (home/login), compose (write new letter), message/[id] (view letter)
+- Screens: index (home/login), compose (write new message), phone-setup (enter phone number), message/[id] (view message)
+- Phone setup: prompted after first login, can be skipped
 
 ### `lib/db` (`@workspace/db`)
 
 Database layer: Drizzle ORM + PostgreSQL.
 
-- Tables: `users`, `sessions` (auth), `messages` (future letters)
+- Tables: `users` (with phoneNumber field), `sessions` (auth), `messages` (future messages)
 - Push schema: `pnpm --filter @workspace/db run push`
 
 ### `lib/api-spec` (`@workspace/api-spec`)

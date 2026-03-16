@@ -1,7 +1,7 @@
 import { Feather } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -149,7 +149,9 @@ function LoginScreen() {
           Send a message to your future self. Get it back in 6 months or a year.
         </Text>
         <Pressable
-          onPress={login}
+          onPress={async () => {
+            await login();
+          }}
           style={({ pressed }) => [
             styles.loginButton,
             pressed && styles.loginButtonPressed,
@@ -167,6 +169,14 @@ export default function HomeScreen() {
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const hasCheckedPhone = useRef(false);
+
+  useEffect(() => {
+    if (isAuthenticated && user && !user.phoneNumber && !hasCheckedPhone.current) {
+      hasCheckedPhone.current = true;
+      router.push("/phone-setup");
+    }
+  }, [isAuthenticated, user]);
 
   const { data: messages, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["messages"],

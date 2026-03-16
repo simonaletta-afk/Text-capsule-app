@@ -71,3 +71,26 @@ export async function markMessageRead(id: number): Promise<Message> {
   const data = await res.json();
   return data.message;
 }
+
+export async function getPhoneNumber(): Promise<string | null> {
+  const base = getApiBaseUrl();
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${base}/api/phone`, { headers });
+  if (!res.ok) throw new Error("Failed to get phone number");
+  const data = await res.json();
+  return data.phoneNumber;
+}
+
+export async function savePhoneNumber(phoneNumber: string): Promise<void> {
+  const base = getApiBaseUrl();
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${base}/api/phone`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ phoneNumber }),
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error || "Failed to save phone number");
+  }
+}
