@@ -144,7 +144,7 @@ function LoginScreen() {
             <Feather name="message-circle" size={32} color={Colors.light.tint} />
           </View>
         </View>
-        <Text style={styles.loginTitle}>Future Text</Text>
+        <Text style={styles.loginTitle}>Text Capsule</Text>
         <Text style={styles.loginSubtitle}>
           Send a message to your future self. Get it back in 6 months or a year.
         </Text>
@@ -223,7 +223,7 @@ export default function HomeScreen() {
     <View style={[styles.container, { paddingTop: insets.top + (Platform.OS === "web" ? 67 : 0) }]}>
       <View style={styles.header}>
         <View>
-          <Text style={styles.headerTitle}>Future Text</Text>
+          <Text style={styles.headerTitle}>Text Capsule</Text>
           <Text style={styles.headerSub}>
             {hasMessages
               ? `${messages?.length} message${(messages?.length ?? 0) > 1 ? "s" : ""}`
