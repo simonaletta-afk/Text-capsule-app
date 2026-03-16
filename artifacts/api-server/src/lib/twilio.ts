@@ -62,6 +62,16 @@ export async function getTwilioFromPhoneNumber() {
   return phoneNumber;
 }
 
+export async function sendWhatsApp(to: string, body: string) {
+  const client = await getTwilioClient();
+  const from = await getTwilioFromPhoneNumber();
+  return client.messages.create({
+    to: `whatsapp:${to}`,
+    from: `whatsapp:${from}`,
+    body,
+  });
+}
+
 export async function sendSMS(to: string, body: string) {
   const client = await getTwilioClient();
   const from = await getTwilioFromPhoneNumber();

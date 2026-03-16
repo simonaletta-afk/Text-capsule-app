@@ -11,11 +11,17 @@ router.get("/phone", async (req: Request, res: Response) => {
   }
 
   const [user] = await db
-    .select({ phoneNumber: usersTable.phoneNumber })
+    .select({
+      phoneNumber: usersTable.phoneNumber,
+      deliveryChannel: usersTable.deliveryChannel,
+    })
     .from(usersTable)
     .where(eq(usersTable.id, req.user.id));
 
-  res.json({ phoneNumber: user?.phoneNumber ?? null });
+  res.json({
+    phoneNumber: user?.phoneNumber ?? null,
+    deliveryChannel: user?.deliveryChannel ?? "whatsapp",
+  });
 });
 
 router.post("/phone", async (req: Request, res: Response) => {
@@ -24,7 +30,7 @@ router.post("/phone", async (req: Request, res: Response) => {
     return;
   }
 
-  const { phoneNumber } = req.body;
+  const { phoneNumber, deliveryChannel } = req.body;
   if (!phoneNumber || typeof phoneNumber !== "string") {
     res.status(400).json({ error: "Phone number is required" });
     return;
@@ -37,13 +43,14 @@ router.post("/phone", async (req: Request, res: Response) => {
   }
 
   const formatted = cleaned.startsWith("+") ? cleaned : `+1${cleaned}`;
+  const channel = deliveryChannel === "sms" ? "sms" : "whatsapp";
 
   await db
     .update(usersTable)
-    .set({ phoneNumber: formatted })
+    .set({ phoneNumber: formatted, deliveryChannel: channel })
     .where(eq(usersTable.id, req.user.id));
 
-  res.json({ success: true, phoneNumber: formatted });
+  res.json({ success: true, phoneNumber: formatted, deliveryChannel: channel });
 });
 
 export default router;

@@ -107,6 +107,7 @@ router.get("/auth/user", async (req: Request, res: Response) => {
       lastName: dbUser.lastName,
       profileImageUrl: dbUser.profileImageUrl,
       phoneNumber: dbUser.phoneNumber,
+      deliveryChannel: dbUser.deliveryChannel ?? "whatsapp",
     },
   });
 });

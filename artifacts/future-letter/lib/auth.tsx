@@ -15,6 +15,7 @@ interface User {
   lastName: string | null;
   profileImageUrl: string | null;
   phoneNumber: string | null;
+  deliveryChannel: string | null;
 }
 
 interface AuthContextValue {

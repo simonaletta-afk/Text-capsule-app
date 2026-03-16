@@ -81,13 +81,13 @@ export async function getPhoneNumber(): Promise<string | null> {
   return data.phoneNumber;
 }
 
-export async function savePhoneNumber(phoneNumber: string): Promise<void> {
+export async function savePhoneNumber(phoneNumber: string, deliveryChannel: "whatsapp" | "sms" = "whatsapp"): Promise<void> {
   const base = getApiBaseUrl();
   const headers = await getAuthHeaders();
   const res = await fetch(`${base}/api/phone`, {
     method: "POST",
     headers,
-    body: JSON.stringify({ phoneNumber }),
+    body: JSON.stringify({ phoneNumber, deliveryChannel }),
   });
   if (!res.ok) {
     const data = await res.json();

@@ -16,9 +16,12 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { savePhoneNumber } from "@/lib/api";
 import Colors from "@/constants/colors";
 
+type Channel = "whatsapp" | "sms";
+
 export default function PhoneSetupScreen() {
   const insets = useSafeAreaInsets();
   const [phone, setPhone] = useState("");
+  const [channel, setChannel] = useState<Channel>("whatsapp");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,7 +48,7 @@ export default function PhoneSetupScreen() {
     setError(null);
 
     try {
-      await savePhoneNumber(`+1${rawDigits}`);
+      await savePhoneNumber(`+1${rawDigits}`, channel);
       router.replace("/");
     } catch (e: any) {
       setError(e.message || "Something went wrong");
@@ -71,8 +74,27 @@ export default function PhoneSetupScreen() {
 
         <Text style={styles.title}>Get texts delivered</Text>
         <Text style={styles.subtitle}>
-          Add your phone number so your future messages arrive as real text messages.
+          Add your phone number so your future messages arrive as real messages.
         </Text>
+
+        <View style={styles.channelRow}>
+          <Pressable
+            onPress={() => setChannel("whatsapp")}
+            style={[styles.channelOption, channel === "whatsapp" && styles.channelOptionSelected]}
+          >
+            <Text style={[styles.channelIcon, channel === "whatsapp" && styles.channelTextSelected]}>
+              WhatsApp
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setChannel("sms")}
+            style={[styles.channelOption, channel === "sms" && styles.channelOptionSelected]}
+          >
+            <Text style={[styles.channelIcon, channel === "sms" && styles.channelTextSelected]}>
+              iMessage / SMS
+            </Text>
+          </Pressable>
+        </View>
 
         <View style={styles.inputContainer}>
           <Text style={styles.countryCode}>+1</Text>
@@ -96,7 +118,9 @@ export default function PhoneSetupScreen() {
         )}
 
         <Text style={styles.disclaimer}>
-          We'll only use this to send your future messages. Standard SMS rates apply.
+          {channel === "whatsapp"
+            ? "We'll send your future messages via WhatsApp. Make sure WhatsApp is installed."
+            : "We'll send your future messages as SMS texts. Standard rates may apply."}
         </Text>
       </View>
 
@@ -165,7 +189,33 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
     textAlign: "center",
     lineHeight: 22,
-    marginBottom: 32,
+    marginBottom: 24,
+  },
+  channelRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginBottom: 20,
+  },
+  channelOption: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    backgroundColor: Colors.light.backgroundSecondary,
+    alignItems: "center",
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  channelOptionSelected: {
+    backgroundColor: Colors.light.tintLight,
+    borderColor: Colors.light.tint,
+  },
+  channelIcon: {
+    fontSize: 14,
+    fontFamily: "Inter_600SemiBold",
+    color: Colors.light.textSecondary,
+  },
+  channelTextSelected: {
+    color: Colors.light.tint,
   },
   inputContainer: {
     flexDirection: "row",

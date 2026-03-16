@@ -1,6 +1,6 @@
 import { db, messagesTable, usersTable } from "@workspace/db";
 import { eq, and, lte } from "drizzle-orm";
-import { sendSMS } from "./twilio";
+import { sendSMS, sendWhatsApp } from "./twilio";
 
 export async function checkAndDeliverMessages() {
   const now = new Date();
@@ -24,17 +24,27 @@ export async function checkAndDeliverMessages() {
 
   for (const msg of dueMessages) {
     const [user] = await db
-      .select({ phoneNumber: usersTable.phoneNumber })
+      .select({
+        phoneNumber: usersTable.phoneNumber,
+        deliveryChannel: usersTable.deliveryChannel,
+      })
       .from(usersTable)
       .where(eq(usersTable.id, msg.userId));
 
     if (user?.phoneNumber) {
       try {
-        const smsBody = `Text Capsule from your past self:\n\n"${msg.content}"`;
-        await sendSMS(user.phoneNumber, smsBody);
-        console.log(`SMS sent to ${user.phoneNumber} for message ${msg.messageId}`);
+        const body = `Text Capsule from your past self:\n\n"${msg.content}"`;
+        const channel = user.deliveryChannel || "whatsapp";
+
+        if (channel === "whatsapp") {
+          await sendWhatsApp(user.phoneNumber, body);
+          console.log(`WhatsApp sent to ${user.phoneNumber} for message ${msg.messageId}`);
+        } else {
+          await sendSMS(user.phoneNumber, body);
+          console.log(`SMS sent to ${user.phoneNumber} for message ${msg.messageId}`);
+        }
       } catch (err) {
-        console.error(`Failed to send SMS for message ${msg.messageId}:`, err);
+        console.error(`Failed to send message ${msg.messageId}:`, err);
       }
     }
 
