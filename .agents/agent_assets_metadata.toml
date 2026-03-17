@@ -6,3 +6,33 @@ id = "DpP1ZoL6pGO1ZuVJXe_B-"
 uri = "file://artifacts/future-letter/assets/images/icon.png"
 type = "image"
 title = "Text Capsule App Icon (iMessage Green)"
+
+[[outputs]]
+id = "jmaOiw8O1rboeMixWgw3y"
+uri = "file://artifacts/future-letter/app-store-screenshots/screenshot-01-login.png"
+type = "image"
+title = "Screenshot 1 - Login (Send messages to your future self)"
+
+[[outputs]]
+id = "4bTc8G6AuBRpHDoNyfbPl"
+uri = "file://artifacts/future-letter/app-store-screenshots/screenshot-02-compose.png"
+type = "image"
+title = "Screenshot 2 - Compose (Get inspired with writing prompts)"
+
+[[outputs]]
+id = "yof5ExOMwbnQzJE_xAq3g"
+uri = "file://artifacts/future-letter/app-store-screenshots/screenshot-03-messages.png"
+type = "image"
+title = "Screenshot 3 - Messages (Your messages, delivered on time)"
+
+[[outputs]]
+id = "nTNQ9nn-aukv6a57Bqy8D"
+uri = "file://artifacts/future-letter/app-store-screenshots/screenshot-04-delivery.png"
+type = "image"
+title = "Screenshot 4 - Delivery (Choose how you receive it)"
+
+[[outputs]]
+id = "gkeFe0y0MYpq15E6Ae1d1"
+uri = "file://artifacts/future-letter/app-store-screenshots/screenshot-05-settings.png"
+type = "image"
+title = "Screenshot 5 - Settings (Your privacy comes first)"
