@@ -4,6 +4,8 @@ import authRouter from "./auth";
 import messagesRouter from "./messages";
 import phoneRouter from "./phone";
 import supportRouter from "./support";
+import contactRouter from "./contact";
+import manageRouter from "./manage";
 
 const router: IRouter = Router();
 
@@ -12,5 +14,7 @@ router.use(authRouter);
 router.use(messagesRouter);
 router.use(phoneRouter);
 router.use(supportRouter);
+router.use(contactRouter);
+router.use(manageRouter);
 
 export default router;
