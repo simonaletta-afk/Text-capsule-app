@@ -36,3 +36,9 @@ id = "gkeFe0y0MYpq15E6Ae1d1"
 uri = "file://artifacts/future-letter/app-store-screenshots/screenshot-05-settings.png"
 type = "image"
 title = "Screenshot 5 - Settings (Your privacy comes first)"
+
+[[outputs]]
+id = "5699UyuKP5SnrEj9ZGBzO"
+uri = "file://future-letter.tar.gz"
+type = "unspecified"
+title = "Text Capsule - Expo Project (Download this)"
