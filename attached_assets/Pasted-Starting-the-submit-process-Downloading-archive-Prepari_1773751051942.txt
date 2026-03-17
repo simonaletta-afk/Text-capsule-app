@@ -1,0 +1,41 @@
+Starting the submit process
+Downloading archive
+Preparing artifact
+Verifying archive
+Creating ascApiJsonKey.json file with ASC credentials
+Submitting iOS app to TestFlight...
+Submitting the app with fastlane pilot
+-------------------
+--- Step: pilot ---
+-------------------
+Creating authorization token for App Store Connect API
+Ready to upload new build to TestFlight (App: 6760695652)...
+Going to upload updated app to App Store Connect
+This might take a few minutes. Please don't interrupt the script.
+[altool] 2026-03-17 05:34:06.297 *** Error: The provided entity includes an attribute with a value that has already been used The bundle version must be higher than the previously uploaded version: ‘1’. (ID: 34edd577-2d4d-41fd-a73a-18916db9afb4) (-19232)
+[altool]  {
+
+[altool]     NSLocalizedDescription = "The provided entity includes an attribute with a value that has already been used";
+
+[altool]     NSLocalizedFailureReason = "The bundle version must be higher than the previously uploaded version: \U20181\U2019. (ID: 34edd577-2d4d-41fd-a73a-18916db9afb4)";
+
+[altool]     NSUnderlyingError = "Error Domain=IrisAPI Code=-19241 \"The provided entity includes an attribute with a value that has already been used\" UserInfo={status=409, detail=The bundle version must be higher than the previously uploaded version., source={\n    pointer = \"/data/attributes/cfBundleVersion\";\n}, id=34edd577-2d4d-41fd-a73a-18916db9afb4, code=ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE, title=The provided entity includes an attribute with a value that has already been used, meta={\n    previousBundleVersion = 1;\n}, NSLocalizedDescription=The provided entity includes an attribute with a value that has already been used, NSLocalizedFailureReason=The bundle version must be higher than the previously uploaded version.}";
+
+[altool]     "iris-code" = "ENTITY_ERROR.ATTRIBUTE.INVALID.DUPLICATE";
+
+[altool]     previousBundleVersion = 1;
+
+[altool] }
+
+Application Loader output above ^
+[ContentDelivery.Uploader.600002E20140] The provided entity includes an attribute with a value that has already been used (-19232) The bundle version must be higher than the previously uploaded version: ‘1’. (ID: 34edd577-2d4d-41fd-a73a-18916db9afb4)
+Error uploading '/var/folders/m1/8_w9962s3b79dqm00nnlm85m0000gn/T/c13809de-42aa-430c-b441-c84d5b947dab.ipa'.
+The provided entity includes an attribute with a value that has already been used The bundle version must be higher than the previously uploaded version: ‘1’. (ID: 34edd577-2d4d-41fd-a73a-18916db9afb4) (-19232)
+The call to the altool completed with a non-zero exit status: 1. This indicates a failure.
+Could not download/upload from App Store Connect!
+[!] Error uploading ipa file: 
+ [Application Loader Error Output]: [ContentDelivery.Uploader.600002E20140] The provided entity includes an attribute with a value that has already been used (-19232) The bundle version must be higher than the previously uploaded version: ‘1’. (ID: 34edd577-2d4d-41fd-a73a-18916db9afb4)
+[Application Loader Error Output]: Error uploading '/var/folders/m1/8_w9962s3b79dqm00nnlm85m0000gn/T/c13809de-42aa-430c-b441-c84d5b947dab.ipa'.
+[Application Loader Error Output]: The provided entity includes an attribute with a value that has already been used The bundle version must be higher than the previously uploaded version: ‘1’. (ID: 34edd577-2d4d-41fd-a73a-18916db9afb4) (-19232)
+[Application Loader Error Output]: The call to the altool completed with a non-zero exit status: 1. This indicates a failure.
+Failed to submit the app to the store

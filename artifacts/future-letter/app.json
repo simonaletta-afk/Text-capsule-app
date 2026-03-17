@@ -2,7 +2,7 @@
   "expo": {
     "name": "Text Capsule",
     "slug": "text-capsule",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "future-letter",
@@ -15,7 +15,8 @@
     },
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.simonaletta.textcapsule"
+      "bundleIdentifier": "com.simonaletta.textcapsule",
+      "buildNumber": "2"
     },
     "android": {
       "package": "com.simonaletta.textcapsule"
