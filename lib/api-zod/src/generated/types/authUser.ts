@@ -16,4 +16,8 @@ export interface AuthUser {
   lastName: string | null;
   /** @nullable */
   profileImageUrl: string | null;
+  /** @nullable */
+  phoneNumber?: string | null;
+  /** @nullable */
+  deliveryChannel?: string | null;
 }

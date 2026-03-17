@@ -1,15 +1,17 @@
 import { Feather } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
+  KeyboardAvoidingView,
   Platform,
   Pressable,
   RefreshControl,
   StyleSheet,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -133,11 +135,37 @@ function PendingMessageBubble({ message }: { message: Message }) {
 }
 
 function LoginScreen() {
-  const { login } = useAuth();
+  const { login, signup } = useAuth();
   const insets = useSafeAreaInsets();
+  const [isSignup, setIsSignup] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const canSubmit = email.trim().length > 0 && password.length >= 6 && !isSubmitting;
+
+  const handleSubmit = async () => {
+    if (!canSubmit) return;
+    setIsSubmitting(true);
+    setError(null);
+
+    const result = isSignup
+      ? await signup(email.trim(), password, firstName.trim() || undefined)
+      : await login(email.trim(), password);
+
+    if (result.error) {
+      setError(result.error);
+      setIsSubmitting(false);
+    }
+  };
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + (Platform.OS === "web" ? 67 : 0), paddingBottom: insets.bottom + (Platform.OS === "web" ? 34 : 0) }]}>
+    <KeyboardAvoidingView
+      style={[styles.container, { paddingTop: insets.top + (Platform.OS === "web" ? 67 : 0), paddingBottom: insets.bottom + (Platform.OS === "web" ? 34 : 0) }]}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <View style={styles.loginContainer}>
         <View style={styles.logoContainer}>
           <View style={styles.logoCircle}>
@@ -148,20 +176,73 @@ function LoginScreen() {
         <Text style={styles.loginSubtitle}>
           Send a message to your future self. Get it back in 6 months or a year.
         </Text>
-        <Pressable
-          onPress={async () => {
-            await login();
-          }}
-          style={({ pressed }) => [
-            styles.loginButton,
-            pressed && styles.loginButtonPressed,
-          ]}
-        >
-          <Text style={styles.loginButtonText}>Get Started</Text>
-          <Feather name="arrow-right" size={18} color="#fff" />
-        </Pressable>
+
+        <View style={styles.authForm}>
+          {isSignup && (
+            <TextInput
+              style={styles.authInput}
+              placeholder="First name (optional)"
+              placeholderTextColor={Colors.light.textTertiary}
+              value={firstName}
+              onChangeText={setFirstName}
+              autoCapitalize="words"
+            />
+          )}
+          <TextInput
+            style={styles.authInput}
+            placeholder="Email"
+            placeholderTextColor={Colors.light.textTertiary}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+          />
+          <TextInput
+            style={styles.authInput}
+            placeholder="Password"
+            placeholderTextColor={Colors.light.textTertiary}
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+
+          {error && (
+            <View style={styles.authErrorRow}>
+              <Feather name="alert-circle" size={14} color={Colors.light.danger} />
+              <Text style={styles.authErrorText}>{error}</Text>
+            </View>
+          )}
+
+          <Pressable
+            onPress={handleSubmit}
+            disabled={!canSubmit}
+            style={({ pressed }) => [
+              styles.loginButton,
+              !canSubmit && styles.loginButtonDisabled,
+              pressed && canSubmit && styles.loginButtonPressed,
+            ]}
+          >
+            {isSubmitting ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <>
+                <Text style={styles.loginButtonText}>
+                  {isSignup ? "Create Account" : "Log In"}
+                </Text>
+                <Feather name="arrow-right" size={18} color="#fff" />
+              </>
+            )}
+          </Pressable>
+
+          <Pressable onPress={() => { setIsSignup(!isSignup); setError(null); }}>
+            <Text style={styles.switchAuthText}>
+              {isSignup ? "Already have an account? Log in" : "Don't have an account? Sign up"}
+            </Text>
+          </Pressable>
+        </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -505,6 +586,31 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 40,
   },
+  authForm: {
+    width: "100%",
+    gap: 12,
+  },
+  authInput: {
+    backgroundColor: Colors.light.card,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    borderRadius: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 16,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.text,
+  },
+  authErrorRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  authErrorText: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
+    color: Colors.light.danger,
+  },
   loginButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -516,6 +622,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     width: "100%",
   },
+  loginButtonDisabled: {
+    opacity: 0.5,
+  },
   loginButtonPressed: {
     transform: [{ scale: 0.96 }],
     opacity: 0.9,
@@ -524,6 +633,13 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontFamily: "Inter_600SemiBold",
     color: "#fff",
+  },
+  switchAuthText: {
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+    color: Colors.light.tint,
+    textAlign: "center",
+    marginTop: 4,
   },
   emptyState: {
     flex: 1,

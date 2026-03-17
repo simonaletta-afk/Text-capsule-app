@@ -9,6 +9,18 @@ export interface HealthStatus {
   status: string;
 }
 
+export interface SignupRequest {
+  email: string;
+  /** @minLength 6 */
+  password: string;
+  firstName?: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
 export interface AuthUser {
   id: string;
   /** @nullable */
@@ -19,27 +31,19 @@ export interface AuthUser {
   lastName: string | null;
   /** @nullable */
   profileImageUrl: string | null;
+  /** @nullable */
+  phoneNumber?: string | null;
+  /** @nullable */
+  deliveryChannel?: string | null;
+}
+
+export interface AuthResponse {
+  token: string;
+  user: AuthUser;
 }
 
 export interface AuthUserEnvelope {
   user: AuthUser | null;
-}
-
-export interface MobileTokenExchangeRequest {
-  /** @minLength 1 */
-  code: string;
-  /** @minLength 1 */
-  code_verifier: string;
-  /** @minLength 1 */
-  redirect_uri: string;
-  /** @minLength 1 */
-  state: string;
-  /** @minLength 1 */
-  nonce?: string;
-}
-
-export interface MobileTokenExchangeSuccess {
-  token: string;
 }
 
 export const LogoutSuccessValue = {
@@ -104,16 +108,3 @@ export type DeleteMessageResponse = typeof DeleteMessageResponseValue;
  * Opaque session token — `Bearer <sid>`.
  */
 export type AuthorizationSessionHeaderParameter = string;
-
-export type BeginBrowserLoginParams = {
-  /**
-   * Relative path to redirect to after login (must start with `/`). Defaults to `/`.
-   */
-  returnTo?: string;
-};
-
-export type HandleBrowserLoginCallbackParams = {
-  code?: string;
-  state?: string;
-  iss?: string;
-};

@@ -5,7 +5,9 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+import type { AuthUser } from "./authUser";
 
-export interface MobileTokenExchangeSuccess {
+export interface AuthResponse {
   token: string;
+  user: AuthUser;
 }
