@@ -13,7 +13,7 @@ if (PRIVATE_KEY && !PRIVATE_KEY.includes('\n')) {
     .replace(/\n\n/g, '\n');
 }
 const APP_ID = '6760695652';
-const LOCALE = 'en-GB';
+const LOCALES = ['en-US', 'en-GB'];
 
 function generateToken() {
   const now = Math.floor(Date.now() / 1000);
