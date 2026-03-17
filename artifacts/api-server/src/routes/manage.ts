@@ -34,11 +34,17 @@ router.get("/manage/app-info", async (_req: Request, res: Response) => {
     res.json({
       app: {
         name: "Text Capsule",
+        urlSlug: "com-textcapsule-app",
         version: "1.0.0",
         bundleId: "com.textcapsule.app",
         status: "active",
         category: "Lifestyle",
-        description: "Send a message to your future self. Get it back in 6 months or a year via SMS or WhatsApp.",
+        tagline: "Send a message to your future self. Get it back in 6 months or a year via SMS or WhatsApp.",
+        fullDescription: "Text Capsule lets you write messages to your future self and have them delivered back to you in 6 months or 1 year via SMS or WhatsApp. Set goals, send positivity, capture gratitude, or share advice with the person you'll become. Your messages are stored securely and delivered right on schedule.",
+        iconImageUrl: "",
+        appStoreLink: "",
+        features: "Future Message Delivery, SMS & WhatsApp Support, Inspiration Prompts, Message History, Secure Storage, Custom Delivery Timing",
+        privacyPolicyText: "Your Privacy Matters\n\nText Capsule is built with your privacy in mind. We collect only the minimum information needed to deliver your future messages.\n\nWhat We Collect\n• Your email address (for account login)\n• Your phone number (to deliver messages via SMS or WhatsApp)\n• The messages you write (stored securely until delivery)\n• Your delivery preferences (SMS or WhatsApp)\n\nHow We Use Your Data\nYour data is used solely to provide the Text Capsule service. We use your phone number to deliver your messages at the scheduled time via Twilio (our messaging provider). We do not sell, share, or use your data for advertising.\n\nMessage Storage\nYour messages are stored securely in our database until they are delivered. After delivery, messages remain in your account history so you can look back on them. You can delete any message at any time.\n\nThird-Party Services\nWe use Twilio to send SMS and WhatsApp messages. When a message is delivered, your phone number and message content are shared with Twilio for the purpose of delivery only. Please refer to Twilio's privacy policy for more information on how they handle data.\n\nData Security\nYour password is securely hashed and never stored in plain text. All communication between the app and our servers is encrypted. We take reasonable measures to protect your personal information.\n\nYour Rights\nYou can:\n• View all your stored messages at any time\n• Delete any message before or after delivery\n• Update your phone number and delivery preferences\n• Request deletion of your account by contacting support\n\nContact Us\nIf you have any questions about this privacy policy or how we handle your data, please reach out through our support page in the app.",
       },
       supportMessages: {
         total: totalResult.count,
