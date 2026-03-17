@@ -1,6 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
-import { db, messagesTable } from "@workspace/db";
+import { db, messagesTable, usersTable } from "@workspace/db";
 import { eq, and } from "drizzle-orm";
+import { sendWhatsApp, sendSMS } from "../lib/twilio";
 import {
   CreateMessageBody,
   GetMessagesResponse,
@@ -85,6 +86,26 @@ router.post("/messages", async (req: Request, res: Response) => {
       deliverAt,
     })
     .returning();
+
+  const [user] = await db
+    .select({ phoneNumber: usersTable.phoneNumber, deliveryChannel: usersTable.deliveryChannel })
+    .from(usersTable)
+    .where(eq(usersTable.id, req.user.id));
+
+  if (user?.phoneNumber) {
+    const timeLabel = frequency === "biannual" ? "6 months" : "1 year";
+    const deliverDate = deliverAt.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+    const confirmMsg = `Your Text Capsule is saved! Your message will be delivered to you on ${deliverDate} (in ${timeLabel}). See you then!`;
+    try {
+      if (user.deliveryChannel === "sms") {
+        await sendSMS(user.phoneNumber, confirmMsg);
+      } else {
+        await sendWhatsApp(user.phoneNumber, confirmMsg);
+      }
+    } catch (err: any) {
+      console.error("Message confirmation text failed:", err?.message);
+    }
+  }
 
   res.status(201).json({ message: serializeMessage(message) });
 });
