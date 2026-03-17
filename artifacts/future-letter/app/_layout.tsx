@@ -26,6 +26,10 @@ function RootLayoutNav() {
       <Stack.Screen name="index" />
       <Stack.Screen name="compose" options={{ presentation: "modal" }} />
       <Stack.Screen name="message/[id]" options={{ presentation: "modal" }} />
+      <Stack.Screen name="settings" />
+      <Stack.Screen name="privacy" />
+      <Stack.Screen name="support" />
+      <Stack.Screen name="phone-setup" />
     </Stack>
   );
 }

@@ -59,7 +59,7 @@ Express 5 API server with custom auth, messages API, and Twilio SMS/WhatsApp del
 
 - Entry: `src/index.ts` — reads `PORT`, starts Express, starts delivery scheduler
 - App setup: `src/app.ts` — mounts CORS, cookie-parser, JSON parsing, auth middleware, routes at `/api`
-- Routes: health, auth (email/password signup + login + logout + user), messages (CRUD), phone (GET/POST phone number)
+- Routes: health, auth (email/password signup + login + logout + user), messages (CRUD), phone (GET/POST phone number), support (POST contact form)
 - Auth: `src/lib/auth.ts` (session mgmt with random tokens stored in DB), `src/middlewares/authMiddleware.ts` (Bearer token + cookie support)
 - Auth endpoints: POST /api/auth/signup, POST /api/auth/login, GET /api/auth/user, POST /api/auth/logout
 - Twilio: `src/lib/twilio.ts` (Twilio client via Replit integration connector or env vars)
@@ -73,7 +73,7 @@ Expo React Native mobile app — "Text Capsule". Users write messages to their f
 - Uses Expo Router for file-based routing
 - Auth via `lib/auth.tsx` (email/password login, token stored in expo-secure-store)
 - API client in `lib/api.ts` (Bearer token auth)
-- Screens: index (home/login with email+password form), compose (write new message), phone-setup (enter phone number + delivery channel), message/[id] (view message)
+- Screens: index (home/login with email+password form), compose (write new message), phone-setup (enter phone number + delivery channel), message/[id] (view message), settings (profile + menu), privacy (privacy policy), support (contact form)
 - Phone setup: prompted after first login if no phone number set
 - Color scheme: indigo primary (#6366F1), iMessage green (#34C759) for app icon
 

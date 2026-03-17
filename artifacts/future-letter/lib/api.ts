@@ -102,3 +102,21 @@ export async function savePhoneNumber(phoneNumber: string, deliveryChannel: "wha
     throw new Error(data.error || "Failed to save phone number");
   }
 }
+
+export async function sendSupportMessage(subject: string, message: string): Promise<void> {
+  const base = getApiBaseUrl();
+  const headers = await getAuthHeaders();
+  const res = await fetch(`${base}/api/support`, {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ subject, message }),
+  });
+  if (!res.ok) {
+    let errorMsg = "Failed to send message";
+    try {
+      const data = await res.json();
+      if (data.error) errorMsg = data.error;
+    } catch {}
+    throw new Error(errorMsg);
+  }
+}

@@ -313,7 +313,16 @@ export default function HomeScreen() {
   return (
     <View style={[styles.container, { paddingTop: insets.top + (Platform.OS === "web" ? 67 : 0) }]}>
       <View style={styles.header}>
-        <View>
+        <Pressable
+          onPress={() => router.push("/settings")}
+          style={({ pressed }) => [
+            styles.settingsButton,
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <Feather name="settings" size={20} color={Colors.light.textSecondary} />
+        </Pressable>
+        <View style={styles.headerCenter}>
           <Text style={styles.headerTitle}>Text Capsule</Text>
           <Text style={styles.headerSub}>
             {hasMessages
@@ -417,6 +426,18 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: Colors.light.borderLight,
+  },
+  settingsButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.light.backgroundSecondary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerCenter: {
+    flex: 1,
+    alignItems: "center",
   },
   headerTitle: {
     fontSize: 24,
