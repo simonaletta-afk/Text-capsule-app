@@ -1,7 +1,31 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 
 const AUTH_TOKEN_KEY = "auth_session_token";
+
+async function storeToken(value: string): Promise<void> {
+  if (Platform.OS === "web") {
+    localStorage.setItem(AUTH_TOKEN_KEY, value);
+  } else {
+    await SecureStore.setItemAsync(AUTH_TOKEN_KEY, value);
+  }
+}
+
+async function getToken(): Promise<string | null> {
+  if (Platform.OS === "web") {
+    return localStorage.getItem(AUTH_TOKEN_KEY);
+  }
+  return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+}
+
+async function deleteToken(): Promise<void> {
+  if (Platform.OS === "web") {
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+  } else {
+    await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+  }
+}
 
 interface User {
   id: string;
@@ -46,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const fetchUser = useCallback(async () => {
     try {
-      const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      const token = await getToken();
       if (!token) {
         setUser(null);
         setIsLoading(false);
@@ -62,7 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.user) {
         setUser(data.user);
       } else {
-        await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+        await deleteToken();
         setUser(null);
       }
     } catch {
@@ -79,6 +103,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     try {
       const apiBase = getApiBaseUrl();
+      console.log("[auth] login apiBase:", apiBase);
       const res = await fetch(`${apiBase}/api/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -92,18 +117,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.token) {
-        await SecureStore.setItemAsync(AUTH_TOKEN_KEY, data.token);
+        await storeToken(data.token);
         setUser(data.user);
       }
       return {};
-    } catch {
-      return { error: "Something went wrong. Please try again." };
+    } catch (e: any) {
+      console.error("[auth] login error:", e);
+      return { error: e?.message || "Something went wrong. Please try again." };
     }
   }, []);
 
   const signup = useCallback(async (email: string, password: string, firstName?: string) => {
     try {
       const apiBase = getApiBaseUrl();
+      console.log("[auth] signup apiBase:", apiBase);
       const res = await fetch(`${apiBase}/api/auth/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -117,18 +144,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.token) {
-        await SecureStore.setItemAsync(AUTH_TOKEN_KEY, data.token);
+        await storeToken(data.token);
         setUser(data.user);
       }
       return {};
-    } catch {
-      return { error: "Something went wrong. Please try again." };
+    } catch (e: any) {
+      console.error("[auth] signup error:", e);
+      return { error: e?.message || "Something went wrong. Please try again." };
     }
   }, []);
 
   const logout = useCallback(async () => {
     try {
-      const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+      const token = await getToken();
       if (token) {
         const apiBase = getApiBaseUrl();
         await fetch(`${apiBase}/api/auth/logout`, {
@@ -138,7 +166,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch {
     } finally {
-      await SecureStore.deleteItemAsync(AUTH_TOKEN_KEY);
+      await deleteToken();
       setUser(null);
     }
   }, []);

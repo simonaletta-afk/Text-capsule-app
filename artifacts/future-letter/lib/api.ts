@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import * as SecureStore from "expo-secure-store";
 
 const AUTH_TOKEN_KEY = "auth_session_token";
@@ -9,8 +10,15 @@ function getApiBaseUrl(): string {
   return "";
 }
 
+async function getToken(): Promise<string | null> {
+  if (Platform.OS === "web") {
+    return localStorage.getItem(AUTH_TOKEN_KEY);
+  }
+  return SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+}
+
 async function getAuthHeaders(): Promise<Record<string, string>> {
-  const token = await SecureStore.getItemAsync(AUTH_TOKEN_KEY);
+  const token = await getToken();
   if (token) {
     return { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
   }
