@@ -3,7 +3,9 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
+  FlatList,
   KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   StyleSheet,
@@ -18,29 +20,79 @@ import Colors from "@/constants/colors";
 
 type Channel = "whatsapp" | "sms";
 
+interface CountryCode {
+  code: string;
+  dial: string;
+  flag: string;
+}
+
+const COUNTRY_CODES: CountryCode[] = [
+  { code: "GB", dial: "+44", flag: "\u{1F1EC}\u{1F1E7}" },
+  { code: "US", dial: "+1", flag: "\u{1F1FA}\u{1F1F8}" },
+  { code: "CA", dial: "+1", flag: "\u{1F1E8}\u{1F1E6}" },
+  { code: "AU", dial: "+61", flag: "\u{1F1E6}\u{1F1FA}" },
+  { code: "DE", dial: "+49", flag: "\u{1F1E9}\u{1F1EA}" },
+  { code: "FR", dial: "+33", flag: "\u{1F1EB}\u{1F1F7}" },
+  { code: "ES", dial: "+34", flag: "\u{1F1EA}\u{1F1F8}" },
+  { code: "IT", dial: "+39", flag: "\u{1F1EE}\u{1F1F9}" },
+  { code: "NL", dial: "+31", flag: "\u{1F1F3}\u{1F1F1}" },
+  { code: "BE", dial: "+32", flag: "\u{1F1E7}\u{1F1EA}" },
+  { code: "IE", dial: "+353", flag: "\u{1F1EE}\u{1F1EA}" },
+  { code: "PT", dial: "+351", flag: "\u{1F1F5}\u{1F1F9}" },
+  { code: "SE", dial: "+46", flag: "\u{1F1F8}\u{1F1EA}" },
+  { code: "NO", dial: "+47", flag: "\u{1F1F3}\u{1F1F4}" },
+  { code: "DK", dial: "+45", flag: "\u{1F1E9}\u{1F1F0}" },
+  { code: "FI", dial: "+358", flag: "\u{1F1EB}\u{1F1EE}" },
+  { code: "CH", dial: "+41", flag: "\u{1F1E8}\u{1F1ED}" },
+  { code: "AT", dial: "+43", flag: "\u{1F1E6}\u{1F1F9}" },
+  { code: "NZ", dial: "+64", flag: "\u{1F1F3}\u{1F1FF}" },
+  { code: "IN", dial: "+91", flag: "\u{1F1EE}\u{1F1F3}" },
+  { code: "PK", dial: "+92", flag: "\u{1F1F5}\u{1F1F0}" },
+  { code: "BD", dial: "+880", flag: "\u{1F1E7}\u{1F1E9}" },
+  { code: "NG", dial: "+234", flag: "\u{1F1F3}\u{1F1EC}" },
+  { code: "GH", dial: "+233", flag: "\u{1F1EC}\u{1F1ED}" },
+  { code: "KE", dial: "+254", flag: "\u{1F1F0}\u{1F1EA}" },
+  { code: "ZA", dial: "+27", flag: "\u{1F1FF}\u{1F1E6}" },
+  { code: "AE", dial: "+971", flag: "\u{1F1E6}\u{1F1EA}" },
+  { code: "SA", dial: "+966", flag: "\u{1F1F8}\u{1F1E6}" },
+  { code: "JP", dial: "+81", flag: "\u{1F1EF}\u{1F1F5}" },
+  { code: "KR", dial: "+82", flag: "\u{1F1F0}\u{1F1F7}" },
+  { code: "CN", dial: "+86", flag: "\u{1F1E8}\u{1F1F3}" },
+  { code: "HK", dial: "+852", flag: "\u{1F1ED}\u{1F1F0}" },
+  { code: "SG", dial: "+65", flag: "\u{1F1F8}\u{1F1EC}" },
+  { code: "MY", dial: "+60", flag: "\u{1F1F2}\u{1F1FE}" },
+  { code: "PH", dial: "+63", flag: "\u{1F1F5}\u{1F1ED}" },
+  { code: "TH", dial: "+66", flag: "\u{1F1F9}\u{1F1ED}" },
+  { code: "BR", dial: "+55", flag: "\u{1F1E7}\u{1F1F7}" },
+  { code: "MX", dial: "+52", flag: "\u{1F1F2}\u{1F1FD}" },
+  { code: "AR", dial: "+54", flag: "\u{1F1E6}\u{1F1F7}" },
+  { code: "CO", dial: "+57", flag: "\u{1F1E8}\u{1F1F4}" },
+  { code: "PL", dial: "+48", flag: "\u{1F1F5}\u{1F1F1}" },
+  { code: "RO", dial: "+40", flag: "\u{1F1F7}\u{1F1F4}" },
+  { code: "GR", dial: "+30", flag: "\u{1F1EC}\u{1F1F7}" },
+  { code: "TR", dial: "+90", flag: "\u{1F1F9}\u{1F1F7}" },
+  { code: "EG", dial: "+20", flag: "\u{1F1EA}\u{1F1EC}" },
+  { code: "IL", dial: "+972", flag: "\u{1F1EE}\u{1F1F1}" },
+];
+
 export default function PhoneSetupScreen() {
   const insets = useSafeAreaInsets();
   const [phone, setPhone] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState<CountryCode>(COUNTRY_CODES[0]);
+  const [showPicker, setShowPicker] = useState(false);
   const [channel, setChannel] = useState<Channel>("whatsapp");
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const formatPhone = (text: string) => {
-    const digits = text.replace(/\D/g, "");
-    if (digits.length <= 3) return digits;
-    if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
-    return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
-  };
-
   const handleChange = (text: string) => {
     const digits = text.replace(/\D/g, "");
-    if (digits.length <= 10) {
-      setPhone(formatPhone(digits));
+    if (digits.length <= 15) {
+      setPhone(digits);
     }
   };
 
   const rawDigits = phone.replace(/\D/g, "");
-  const canSave = rawDigits.length === 10 && !isSaving;
+  const canSave = rawDigits.length >= 7 && rawDigits.length <= 15 && !isSaving;
 
   const handleSave = async () => {
     if (!canSave) return;
@@ -48,7 +100,7 @@ export default function PhoneSetupScreen() {
     setError(null);
 
     try {
-      await savePhoneNumber(`+1${rawDigits}`, channel);
+      await savePhoneNumber(`${selectedCountry.dial}${rawDigits}`, channel);
       router.replace("/");
     } catch (e: any) {
       setError(e.message || "Something went wrong");
@@ -97,16 +149,19 @@ export default function PhoneSetupScreen() {
         </View>
 
         <View style={styles.inputContainer}>
-          <Text style={styles.countryCode}>+1</Text>
+          <Pressable onPress={() => setShowPicker(true)} style={styles.countryCodeButton}>
+            <Text style={styles.countryFlag}>{selectedCountry.flag}</Text>
+            <Text style={styles.countryCode}>{selectedCountry.dial}</Text>
+            <Feather name="chevron-down" size={14} color={Colors.light.textSecondary} />
+          </Pressable>
           <TextInput
             style={styles.phoneInput}
-            placeholder="(555) 123-4567"
+            placeholder="Phone number"
             placeholderTextColor={Colors.light.textTertiary}
             keyboardType="phone-pad"
             value={phone}
             onChangeText={handleChange}
             autoFocus
-            maxLength={14}
           />
         </View>
 
@@ -150,6 +205,42 @@ export default function PhoneSetupScreen() {
           )}
         </Pressable>
       </View>
+
+      <Modal visible={showPicker} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { paddingBottom: insets.bottom + 16 }]}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Select country</Text>
+              <Pressable onPress={() => setShowPicker(false)} style={styles.modalClose}>
+                <Feather name="x" size={22} color={Colors.light.text} />
+              </Pressable>
+            </View>
+            <FlatList
+              data={COUNTRY_CODES}
+              keyExtractor={(item) => `${item.code}-${item.dial}`}
+              renderItem={({ item }) => (
+                <Pressable
+                  onPress={() => {
+                    setSelectedCountry(item);
+                    setShowPicker(false);
+                  }}
+                  style={[
+                    styles.countryRow,
+                    item.code === selectedCountry.code && item.dial === selectedCountry.dial && styles.countryRowSelected,
+                  ]}
+                >
+                  <Text style={styles.countryRowFlag}>{item.flag}</Text>
+                  <Text style={styles.countryRowCode}>{item.code}</Text>
+                  <Text style={styles.countryRowDial}>{item.dial}</Text>
+                  {item.code === selectedCountry.code && item.dial === selectedCountry.dial && (
+                    <Feather name="check" size={18} color={Colors.light.tint} style={{ marginLeft: "auto" }} />
+                  )}
+                </Pressable>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -224,21 +315,33 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.light.border,
     borderRadius: 14,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingRight: 16,
+    paddingVertical: 4,
+  },
+  countryCodeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRightWidth: 1,
+    borderRightColor: Colors.light.border,
+    marginRight: 10,
+  },
+  countryFlag: {
+    fontSize: 20,
   },
   countryCode: {
-    fontSize: 18,
+    fontSize: 16,
     fontFamily: "Inter_500Medium",
     color: Colors.light.text,
-    marginRight: 8,
   },
   phoneInput: {
     flex: 1,
     fontSize: 18,
     fontFamily: "Inter_400Regular",
     color: Colors.light.text,
-    paddingVertical: 0,
+    paddingVertical: 10,
   },
   errorRow: {
     flexDirection: "row",
@@ -296,5 +399,58 @@ const styles = StyleSheet.create({
   },
   saveTextDisabled: {
     color: Colors.light.textTertiary,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: Colors.light.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: "60%",
+    paddingTop: 8,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.light.borderLight,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: "Inter_600SemiBold",
+    color: Colors.light.text,
+  },
+  modalClose: {
+    padding: 4,
+  },
+  countryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    gap: 12,
+  },
+  countryRowSelected: {
+    backgroundColor: Colors.light.tintLight,
+  },
+  countryRowFlag: {
+    fontSize: 22,
+  },
+  countryRowCode: {
+    fontSize: 15,
+    fontFamily: "Inter_500Medium",
+    color: Colors.light.text,
+    width: 30,
+  },
+  countryRowDial: {
+    fontSize: 15,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textSecondary,
   },
 });
