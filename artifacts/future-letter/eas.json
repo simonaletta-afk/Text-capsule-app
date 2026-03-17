@@ -21,14 +21,5 @@
         "EXPO_PUBLIC_DOMAIN": "958af9b8-ee36-4555-804f-8efae2d17976-00-34tezo5s1ntmj.spock.replit.dev"
       }
     }
-  },
-  "submit": {
-    "production": {
-      "ios": {
-        "appleId": "simonaletta@hotmail.co.uk",
-        "ascAppId": "future-letter",
-        "appleTeamId": ""
-      }
-    }
   }
 }
