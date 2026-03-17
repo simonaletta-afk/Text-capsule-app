@@ -1,0 +1,49 @@
+React Compiler enabled
+Starting Metro Bundler
+iOS node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓░░░░░░░░ 55.6% (464/622)
+iOS node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js ▓▓▓▓▓▓▓▓▓▓▓▓▓▓░░ 91.5% (1388/1451)
+iOS Bundling failed 6007ms node_modules/.pnpm/expo-router@6.0.23_@types+react-dom@19.1.11_@types+react@19.1.17__@types+react@19.1.17__647f0c9f9fafa8cae778bbb6d28cc5ec/node_modules/expo-router/entry.js (1556 modules)
+Unable to resolve module react-native-purchases from /Users/expo/workingdir/build/artifacts/future-letter/lib/revenuecat.tsx: react-native-purchases could not be found within the project or in these directories:
+  node_modules
+  ../../node_modules
+  node_modules
+  ../../node_modules
+[0m [90m 1 |[39m [36mimport[39m [33mReact[39m[33m,[39m { createContext[33m,[39m useContext } [36mfrom[39m [32m"react"[39m[33m;[39m
+ [90m 2 |[39m [36mimport[39m { [33mPlatform[39m } [36mfrom[39m [32m"react-native"[39m[33m;[39m
+[31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m [33mPurchases[39m [36mfrom[39m [32m"react-native-purchases"[39m[33m;[39m
+ [90m   |[39m                        [31m[1m^[22m[39m
+ [90m 4 |[39m [36mimport[39m { useMutation[33m,[39m useQuery } [36mfrom[39m [32m"@tanstack/react-query"[39m[33m;[39m
+ [90m 5 |[39m
+ [90m 6 |[39m [36mconst[39m [33mREVENUECAT_IOS_API_KEY[39m [33m=[39m process[33m.[39menv[33m.[39m[33mEXPO_PUBLIC_REVENUECAT_IOS_API_KEY[39m[33m;[39m[0m
+
+Import stack:
+
+ artifacts/future-letter/lib/revenuecat.tsx
+ | import "react-native-purchases"
+
+ artifacts/future-letter/app/_layout.tsx
+ | import "@/lib/revenuecat"
+
+ artifacts/future-letter/app (require.context)
+Error: Unable to resolve module react-native-purchases from /Users/expo/workingdir/build/artifacts/future-letter/lib/revenuecat.tsx: react-native-purchases could not be found within the project or in these directories:
+  node_modules
+  ../../node_modules
+  node_modules
+  ../../node_modules
+[0m [90m 1 |[39m [36mimport[39m [33mReact[39m[33m,[39m { createContext[33m,[39m useContext } [36mfrom[39m [32m"react"[39m[33m;[39m
+ [90m 2 |[39m [36mimport[39m { [33mPlatform[39m } [36mfrom[39m [32m"react-native"[39m[33m;[39m
+[31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m [33mPurchases[39m [36mfrom[39m [32m"react-native-purchases"[39m[33m;[39m
+ [90m   |[39m                        [31m[1m^[22m[39m
+ [90m 4 |[39m [36mimport[39m { useMutation[33m,[39m useQuery } [36mfrom[39m [32m"@tanstack/react-query"[39m[33m;[39m
+ [90m 5 |[39m
+ [90m 6 |[39m [36mconst[39m [33mREVENUECAT_IOS_API_KEY[39m [33m=[39m process[33m.[39menv[33m.[39m[33mEXPO_PUBLIC_REVENUECAT_IOS_API_KEY[39m[33m;[39m[0m
+
+Import stack:
+
+ artifacts/future-letter/lib/revenuecat.tsx
+ | import "react-native-purchases"
+
+ artifacts/future-letter/app/_layout.tsx
+ | import "@/lib/revenuecat"
+
+ artifacts/future-letter/app (require.context)

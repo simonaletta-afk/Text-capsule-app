@@ -154,6 +154,9 @@ importers:
       expo-secure-store:
         specifier: ~15.0.8
         version: 15.0.8(expo@54.0.33)
+      react-native-purchases:
+        specifier: ^8.2.5
+        version: 8.12.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
     devDependencies:
       '@babel/core':
         specifier: ^7.25.2
@@ -2747,6 +2750,9 @@ packages:
 
   '@revenuecat/purchases-js@1.28.0':
     resolution: {integrity: sha512-FtmOsoc4JNWueFnMtT+fIBAhTLxT1Uu7e0zTEg0WaUTvMWS8GOSxsKiT4h07qDdPiqUQw4Eh+GdhueSrXMjUpw==}
+
+  '@revenuecat/purchases-typescript-internal@14.3.0':
+    resolution: {integrity: sha512-P3IhlWvH4wJAM9ypv8HamdIBMQfnLdU9PbjURw+s7NxHOL8LmPGhKuyv+gBINpka27mt1CAsDoOhNHjkexJhkg==}
 
   '@revenuecat/purchases-typescript-internal@17.51.1':
     resolution: {integrity: sha512-nk/JF9UCn2eqYJr619ZTpBtEvm3JP8ZnBkHwB8z36zQ3H4w3G+ss6kigGm51eWPD0Rv2hZOdsXja0f3EwSqLJQ==}
@@ -5618,6 +5624,12 @@ packages:
       react: '*'
       react-native: '*'
       react-native-reanimated: '>=3.0.0'
+
+  react-native-purchases@8.12.0:
+    resolution: {integrity: sha512-0T6WtSDN96swsS6iLeTh7GEGLSedBr4FWP5JsGLnP6Ri7Rp754pf3UJ+S0+ZnT1cqUZ4W2z2oB6zTLyyfNfuKw==}
+    peerDependencies:
+      react: '>= 16.6.3'
+      react-native: '*'
 
   react-native-purchases@9.13.0:
     resolution: {integrity: sha512-1JKg0jh+7GzJQuEdfZtN8vpeHXyTAVOu/+hlxCr0Kk/2dKmC1aXLB5C5/sSHO7kJcZ3kR7AgwCwBFDwYyDyvgg==}
@@ -9217,6 +9229,8 @@ snapshots:
 
   '@revenuecat/purchases-js@1.28.0': {}
 
+  '@revenuecat/purchases-typescript-internal@14.3.0': {}
+
   '@revenuecat/purchases-typescript-internal@17.51.1': {}
 
   '@rolldown/pluginutils@1.0.0-rc.3': {}
@@ -12314,6 +12328,12 @@ snapshots:
       react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)
       react-native-is-edge-to-edge: 1.3.1(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       react-native-reanimated: 4.1.6(@babel/core@7.29.0)(react-native-worklets@0.5.1(@babel/core@7.29.0)(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+
+  react-native-purchases@8.12.0(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0):
+    dependencies:
+      '@revenuecat/purchases-typescript-internal': 14.3.0
+      react: 19.1.0
+      react-native: 0.81.5(@babel/core@7.29.0)(@types/react@19.1.17)(react@19.1.0)
 
   react-native-purchases@9.13.0(react-native-web@0.21.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.29.0)(@types/react@19.2.14)(react@19.1.0))(react@19.1.0):
     dependencies:
