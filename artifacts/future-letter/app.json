@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Text Capsule",
-    "slug": "future-letter",
+    "slug": "text-capsule",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -36,6 +36,14 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9203f17c-3764-4c99-b9d1-7d563b1edb47"
+      },
+      "router": {
+        "origin": "https://replit.com/"
+      }
     }
   }
 }
