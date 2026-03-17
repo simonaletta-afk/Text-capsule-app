@@ -2,9 +2,10 @@ import { Feather } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import * as Haptics from "expo-haptics";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Animated,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -74,6 +75,11 @@ export default function ComposeScreen() {
   const [frequency, setFrequency] = useState<Frequency>("yearly");
   const [isSending, setIsSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState(false);
+
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current;
+  const checkAnim = useRef(new Animated.Value(0)).current;
 
   const deliveryDate = new Date();
   if (frequency === "biannual") {
@@ -100,11 +106,21 @@ export default function ComposeScreen() {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
       queryClient.invalidateQueries({ queryKey: ["messages"] });
-      router.back();
+      setShowConfirmation(true);
+      Animated.parallel([
+        Animated.timing(fadeAnim, { toValue: 1, duration: 300, useNativeDriver: true }),
+        Animated.spring(scaleAnim, { toValue: 1, friction: 6, tension: 80, useNativeDriver: true }),
+      ]).start(() => {
+        Animated.timing(checkAnim, { toValue: 1, duration: 400, useNativeDriver: true }).start();
+      });
     } catch (e) {
       setError("Something went wrong. Please try again.");
       setIsSending(false);
     }
+  };
+
+  const handleDone = () => {
+    router.back();
   };
 
   const handlePromptTap = (starter: string) => {
@@ -238,26 +254,58 @@ export default function ComposeScreen() {
         </View>
       )}
 
-      <View style={[styles.inputBar, { paddingBottom: Platform.OS === "web" ? insets.bottom + 34 : Math.max(insets.bottom, 8) }]}>
-        <Text style={styles.inputBarLabel}>
-          Arrives {formattedDelivery}
-        </Text>
-        <Pressable
-          onPress={handleSend}
-          disabled={!canSend}
-          style={({ pressed }) => [
-            styles.sendButton,
-            !canSend && styles.sendButtonDisabled,
-            pressed && canSend && { transform: [{ scale: 0.92 }] },
-          ]}
-        >
-          {isSending ? (
-            <ActivityIndicator size="small" color="#fff" />
-          ) : (
-            <Feather name="send" size={20} color={canSend ? "#fff" : Colors.light.textTertiary} />
-          )}
-        </Pressable>
-      </View>
+      {!showConfirmation && (
+        <View style={[styles.inputBar, { paddingBottom: Platform.OS === "web" ? insets.bottom + 34 : Math.max(insets.bottom, 8) }]}>
+          <Text style={styles.inputBarLabel}>
+            Arrives {formattedDelivery}
+          </Text>
+          <Pressable
+            onPress={handleSend}
+            disabled={!canSend}
+            style={({ pressed }) => [
+              styles.sendButton,
+              !canSend && styles.sendButtonDisabled,
+              pressed && canSend && { transform: [{ scale: 0.92 }] },
+            ]}
+          >
+            {isSending ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Feather name="send" size={20} color={canSend ? "#fff" : Colors.light.textTertiary} />
+            )}
+          </Pressable>
+        </View>
+      )}
+
+      {showConfirmation && (
+        <Animated.View style={[styles.confirmationOverlay, { opacity: fadeAnim }]}>
+          <Animated.View style={[styles.confirmationCard, { transform: [{ scale: scaleAnim }] }]}>
+            <Animated.View style={[styles.checkCircle, { opacity: checkAnim }]}>
+              <Feather name="check" size={36} color="#fff" />
+            </Animated.View>
+            <Text style={styles.confirmationTitle}>Message Sealed!</Text>
+            <Text style={styles.confirmationSubtitle}>
+              Your text capsule has been saved and will be delivered to you on
+            </Text>
+            <View style={styles.confirmationDateBadge}>
+              <Feather name="calendar" size={14} color={Colors.light.tint} />
+              <Text style={styles.confirmationDate}>{formattedDelivery}</Text>
+            </View>
+            <Text style={styles.confirmationNote}>
+              You'll receive an SMS when it's time to open it.
+            </Text>
+            <Pressable
+              onPress={handleDone}
+              style={({ pressed }) => [
+                styles.confirmationButton,
+                pressed && { opacity: 0.85 },
+              ]}
+            >
+              <Text style={styles.confirmationButtonText}>Done</Text>
+            </Pressable>
+          </Animated.View>
+        </Animated.View>
+      )}
     </KeyboardAvoidingView>
   );
 }
@@ -454,5 +502,74 @@ const styles = StyleSheet.create({
   },
   sendButtonDisabled: {
     backgroundColor: Colors.light.backgroundSecondary,
+  },
+  confirmationOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(250, 250, 249, 0.97)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+  },
+  confirmationCard: {
+    alignItems: "center",
+    paddingHorizontal: 32,
+    paddingVertical: 40,
+    maxWidth: 340,
+  },
+  checkCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: Colors.light.success,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  confirmationTitle: {
+    fontSize: 24,
+    fontFamily: "Inter_700Bold",
+    color: Colors.light.text,
+    marginBottom: 10,
+  },
+  confirmationSubtitle: {
+    fontSize: 15,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textSecondary,
+    textAlign: "center",
+    lineHeight: 22,
+    marginBottom: 12,
+  },
+  confirmationDateBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    backgroundColor: Colors.light.tintLight,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    marginBottom: 16,
+  },
+  confirmationDate: {
+    fontSize: 15,
+    fontFamily: "Inter_600SemiBold",
+    color: Colors.light.tint,
+  },
+  confirmationNote: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textTertiary,
+    textAlign: "center",
+    marginBottom: 28,
+  },
+  confirmationButton: {
+    backgroundColor: Colors.light.tint,
+    paddingHorizontal: 48,
+    paddingVertical: 14,
+    borderRadius: 26,
+  },
+  confirmationButtonText: {
+    fontSize: 16,
+    fontFamily: "Inter_600SemiBold",
+    color: "#fff",
   },
 });

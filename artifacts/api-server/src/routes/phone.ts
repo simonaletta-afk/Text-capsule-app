@@ -21,7 +21,7 @@ router.get("/phone", async (req: Request, res: Response) => {
 
   res.json({
     phoneNumber: user?.phoneNumber ?? null,
-    deliveryChannel: user?.deliveryChannel ?? "whatsapp",
+    deliveryChannel: user?.deliveryChannel ?? "sms",
   });
 });
 
