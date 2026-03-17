@@ -6,17 +6,26 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "ios": {
+        "image": "latest"
+      },
       "env": {
         "EXPO_PUBLIC_DOMAIN": "958af9b8-ee36-4555-804f-8efae2d17976-00-34tezo5s1ntmj.spock.replit.dev"
       }
     },
     "preview": {
       "distribution": "internal",
+      "ios": {
+        "image": "latest"
+      },
       "env": {
         "EXPO_PUBLIC_DOMAIN": "958af9b8-ee36-4555-804f-8efae2d17976-00-34tezo5s1ntmj.spock.replit.dev"
       }
     },
     "production": {
+      "ios": {
+        "image": "latest"
+      },
       "env": {
         "EXPO_PUBLIC_DOMAIN": "958af9b8-ee36-4555-804f-8efae2d17976-00-34tezo5s1ntmj.spock.replit.dev"
       }
