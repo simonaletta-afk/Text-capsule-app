@@ -16,6 +16,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { savePhoneNumber } from "@/lib/api";
+import { useAuth } from "@/lib/auth";
 import Colors from "@/constants/colors";
 
 type Channel = "whatsapp" | "sms";
@@ -77,6 +78,7 @@ const COUNTRY_CODES: CountryCode[] = [
 
 export default function PhoneSetupScreen() {
   const insets = useSafeAreaInsets();
+  const { refreshUser } = useAuth();
   const [phone, setPhone] = useState("");
   const [selectedCountry, setSelectedCountry] = useState<CountryCode>(COUNTRY_CODES[0]);
   const [showPicker, setShowPicker] = useState(false);
@@ -101,6 +103,7 @@ export default function PhoneSetupScreen() {
 
     try {
       await savePhoneNumber(`${selectedCountry.dial}${rawDigits}`, channel);
+      await refreshUser();
       router.replace("/");
     } catch (e: any) {
       setError(e.message || "Something went wrong");
