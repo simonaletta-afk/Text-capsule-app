@@ -19,6 +19,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@/lib/auth";
 import { fetchMessages, type Message } from "@/lib/api";
 import Colors from "@/constants/colors";
+import { useSubscription } from "@/lib/revenuecat";
 
 function formatRelativeDate(dateStr: string): string {
   const date = new Date(dateStr);
@@ -248,6 +249,7 @@ function LoginScreen() {
 
 export default function HomeScreen() {
   const { user, isLoading: authLoading, isAuthenticated } = useAuth();
+  const { isSubscribed, freeMessageLimit } = useSubscription();
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
   const hasCheckedPhone = useRef(false);
@@ -340,6 +342,18 @@ export default function HomeScreen() {
           <Feather name="edit" size={20} color="#fff" />
         </Pressable>
       </View>
+
+      {!isSubscribed && hasMessages && (
+        <Pressable
+          onPress={() => router.push("/paywall")}
+          style={({ pressed }) => [styles.freeBanner, pressed && { opacity: 0.85 }]}
+        >
+          <Text style={styles.freeBannerText}>
+            Free plan: {Math.max(0, freeMessageLimit - (messages?.length ?? 0))} of {freeMessageLimit} capsules remaining
+          </Text>
+          <Text style={styles.freeBannerCta}>Upgrade</Text>
+        </Pressable>
+      )}
 
       {isLoading ? (
         <View style={styles.center}>
@@ -730,5 +744,31 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontFamily: "Inter_600SemiBold",
     color: Colors.light.tint,
+  },
+  freeBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginHorizontal: 16,
+    marginTop: 4,
+    marginBottom: 4,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    backgroundColor: Colors.light.tintLight,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: Colors.light.tint + "30",
+  },
+  freeBannerText: {
+    fontSize: 13,
+    fontFamily: "Inter_500Medium",
+    color: Colors.light.tint,
+    flex: 1,
+  },
+  freeBannerCta: {
+    fontSize: 13,
+    fontFamily: "Inter_600SemiBold",
+    color: Colors.light.tint,
+    marginLeft: 8,
   },
 });
