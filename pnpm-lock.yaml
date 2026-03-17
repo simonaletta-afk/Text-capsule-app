@@ -70,6 +70,10 @@ catalogs:
 importers:
 
   .:
+    dependencies:
+      jsonwebtoken:
+        specifier: ^9.0.3
+        version: 9.0.3
     devDependencies:
       prettier:
         specifier: ^3.8.1
