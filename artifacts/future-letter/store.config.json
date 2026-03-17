@@ -9,8 +9,8 @@
         "description": "Send a message to your future self and receive it in 6 months or a year via SMS or WhatsApp.\n\nText Capsule lets you write letters, set goals, send encouragement, and capture memories — then delivers them back to you when the time comes.\n\nFeatures:\n• Write messages with creative writing prompts\n• Choose delivery in 6 months or 1 year\n• Receive via SMS or WhatsApp\n• View your message history\n• Simple, beautiful chat-style interface\n\nWrite today. Receive tomorrow.",
         "keywords": ["time capsule", "future self", "messages", "letter", "goals", "motivation", "SMS", "WhatsApp", "reminders", "journal"],
         "promoText": "Send messages to your future self",
-        "supportUrl": "https://958af9b8-ee36-4555-804f-8efae2d17976-00-34tezo5s1ntmj.spock.replit.dev/api/support",
-        "privacyPolicyUrl": "https://958af9b8-ee36-4555-804f-8efae2d17976-00-34tezo5s1ntmj.spock.replit.dev/api/privacy"
+        "supportUrl": "https://future-message-timer.replit.app/api/support",
+        "privacyPolicyUrl": "https://future-message-timer.replit.app/api/privacy"
       }
     }
   }
