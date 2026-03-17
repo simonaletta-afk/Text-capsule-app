@@ -23,10 +23,8 @@
       }
     },
     "production": {
-      "autoSubmit": true,
       "ios": {
-        "image": "latest",
-        "autoSubmit": true
+        "image": "latest"
       },
       "env": {
         "EXPO_PUBLIC_DOMAIN": "future-message-timer.replit.app"
