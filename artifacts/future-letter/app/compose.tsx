@@ -17,8 +17,9 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { createMessage } from "@/lib/api";
+import { createMessage, fetchMessages } from "@/lib/api";
 import Colors from "@/constants/colors";
+import { useSubscription } from "@/lib/revenuecat";
 
 type Frequency = "yearly" | "biannual";
 
@@ -71,6 +72,7 @@ const PROMPTS: Prompt[] = [
 export default function ComposeScreen() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
+  const { isSubscribed, freeMessageLimit } = useSubscription();
   const [content, setContent] = useState("");
   const [frequency, setFrequency] = useState<Frequency>("yearly");
   const [isSending, setIsSending] = useState(false);
@@ -101,6 +103,14 @@ export default function ComposeScreen() {
     setError(null);
 
     try {
+      if (!isSubscribed) {
+        const existingMessages = await fetchMessages();
+        if (existingMessages.length >= freeMessageLimit) {
+          setIsSending(false);
+          router.push("/paywall");
+          return;
+        }
+      }
       await createMessage(content.trim(), frequency);
       if (Platform.OS !== "web") {
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
