@@ -14,9 +14,12 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": false
+      "supportsTablet": false,
+      "bundleIdentifier": "com.simonaletta.textcapsule"
     },
-    "android": {},
+    "android": {
+      "package": "com.simonaletta.textcapsule"
+    },
     "web": {
       "favicon": "./assets/images/icon.png"
     },
