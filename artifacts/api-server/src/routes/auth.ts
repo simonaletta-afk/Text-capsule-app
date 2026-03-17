@@ -77,7 +77,7 @@ router.post("/auth/signup", async (req: Request, res: Response) => {
       lastName: user.lastName,
       profileImageUrl: user.profileImageUrl,
       phoneNumber: user.phoneNumber,
-      deliveryChannel: user.deliveryChannel ?? "whatsapp",
+      deliveryChannel: user.deliveryChannel ?? "sms",
     },
   });
 });
@@ -126,7 +126,7 @@ router.post("/auth/login", async (req: Request, res: Response) => {
       lastName: user.lastName,
       profileImageUrl: user.profileImageUrl,
       phoneNumber: user.phoneNumber,
-      deliveryChannel: user.deliveryChannel ?? "whatsapp",
+      deliveryChannel: user.deliveryChannel ?? "sms",
     },
   });
 });
@@ -155,7 +155,7 @@ router.get("/auth/user", async (req: Request, res: Response) => {
       lastName: dbUser.lastName,
       profileImageUrl: dbUser.profileImageUrl,
       phoneNumber: dbUser.phoneNumber,
-      deliveryChannel: dbUser.deliveryChannel ?? "whatsapp",
+      deliveryChannel: dbUser.deliveryChannel ?? "sms",
     },
   });
 });
