@@ -98,6 +98,5 @@ Generated Zod schemas and React Query hooks from OpenAPI spec.
 
 - `DATABASE_URL` — PostgreSQL connection string (auto-provided)
 - `TWILIO_ACCOUNT_SID` — Twilio account SID
-- `TWILIO_API_KEY` — Twilio API key (SK-prefixed)
-- `TWILIO_API_KEY_SECRET` — Twilio API key secret
+- `TWILIO_AUTH_TOKEN` — Twilio auth token
 - `TWILIO_PHONE_NUMBER` — Twilio sending phone number (+447307240645)
