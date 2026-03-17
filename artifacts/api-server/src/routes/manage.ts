@@ -1,6 +1,6 @@
 import { Router, type IRouter, type Request, type Response, type NextFunction } from "express";
-import { db, supportMessagesTable, messagesTable } from "@workspace/db";
-import { eq, desc, count, sql } from "drizzle-orm";
+import { db, supportMessagesTable } from "@workspace/db";
+import { eq, desc, count } from "drizzle-orm";
 
 const router: IRouter = Router();
 
@@ -15,6 +15,8 @@ function requireApiKey(req: Request, res: Response, next: NextFunction) {
 
   next();
 }
+
+const VALID_STATUSES = ["new", "read", "in-progress", "resolved", "closed"];
 
 router.use("/manage", requireApiKey);
 
@@ -55,22 +57,27 @@ router.get("/manage/messages", async (req: Request, res: Response) => {
     const limit = Math.min(Math.max(parseInt(req.query.limit as string) || 50, 1), 200);
     const offset = Math.max(parseInt(req.query.offset as string) || 0, 0);
 
-    let query = db
+    if (status && !VALID_STATUSES.includes(status)) {
+      res.status(400).json({
+        error: `Invalid status filter. Must be one of: ${VALID_STATUSES.join(", ")}`,
+      });
+      return;
+    }
+
+    const statusCondition = status ? eq(supportMessagesTable.status, status) : undefined;
+
+    const messages = await db
       .select()
       .from(supportMessagesTable)
+      .where(statusCondition)
       .orderBy(desc(supportMessagesTable.createdAt))
       .limit(limit)
       .offset(offset);
 
-    if (status) {
-      query = query.where(eq(supportMessagesTable.status, status)) as typeof query;
-    }
-
-    const messages = await query;
-
     const [totalResult] = await db
       .select({ count: count() })
-      .from(supportMessagesTable);
+      .from(supportMessagesTable)
+      .where(statusCondition);
 
     res.json({
       messages,
@@ -110,8 +117,6 @@ router.get("/manage/messages/:id", async (req: Request, res: Response) => {
     res.status(500).json({ error: "Failed to fetch message" });
   }
 });
-
-const VALID_STATUSES = ["new", "read", "in-progress", "resolved", "closed"];
 
 router.patch("/manage/messages/:id/status", async (req: Request, res: Response) => {
   try {

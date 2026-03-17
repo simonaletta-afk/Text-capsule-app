@@ -59,7 +59,7 @@ Express 5 API server with custom auth, messages API, and Twilio SMS/WhatsApp del
 
 - Entry: `src/index.ts` — reads `PORT`, starts Express, starts delivery scheduler
 - App setup: `src/app.ts` — mounts CORS, cookie-parser, JSON parsing, auth middleware, routes at `/api`
-- Routes: health, auth (email/password signup + login + logout + user), messages (CRUD), phone (GET/POST phone number), support (POST contact form)
+- Routes: health, auth (email/password signup + login + logout + user), messages (CRUD), phone (GET/POST phone number), support (POST in-app support), contact (POST public contact form → DB + Resend email), manage (GET/PATCH management API secured by x-api-key)
 - Auth: `src/lib/auth.ts` (session mgmt with random tokens stored in DB), `src/middlewares/authMiddleware.ts` (Bearer token + cookie support)
 - Auth endpoints: POST /api/auth/signup, POST /api/auth/login, GET /api/auth/user, POST /api/auth/logout
 - Twilio: `src/lib/twilio.ts` (Twilio client via Replit integration connector or env vars)
@@ -81,7 +81,7 @@ Expo React Native mobile app — "Text Capsule". Users write messages to their f
 
 Database layer: Drizzle ORM + PostgreSQL.
 
-- Tables: `users` (with email, passwordHash, phoneNumber, deliveryChannel), `sessions` (auth), `messages` (future messages)
+- Tables: `users` (with email, passwordHash, phoneNumber, deliveryChannel), `sessions` (auth), `messages` (future messages), `support_messages` (contact form submissions with status tracking)
 - Push schema: `pnpm --filter @workspace/db run push`
 
 ### `lib/api-spec` (`@workspace/api-spec`)
@@ -100,3 +100,5 @@ Generated Zod schemas and React Query hooks from OpenAPI spec.
 - `TWILIO_ACCOUNT_SID` — Twilio account SID
 - `TWILIO_AUTH_TOKEN` — Twilio auth token
 - `TWILIO_PHONE_NUMBER` — Twilio sending phone number (+447307240645)
+- `RESEND_API_KEY` — Resend API key for email notifications on contact form submissions
+- `MANAGEMENT_API_KEY` — API key for management endpoints (x-api-key header)
