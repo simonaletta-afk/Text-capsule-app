@@ -21,6 +21,52 @@ import Colors from "@/constants/colors";
 
 type Frequency = "yearly" | "biannual";
 
+interface Prompt {
+  icon: string;
+  title: string;
+  subtitle: string;
+  starter: string;
+}
+
+const PROMPTS: Prompt[] = [
+  {
+    icon: "\u{1F3AF}",
+    title: "Set yourself goals",
+    subtitle: "Write down what you want to achieve and check back in a year",
+    starter: "Hey future me, here are the goals I'm setting for myself right now:\n\n1. ",
+  },
+  {
+    icon: "\u{2728}",
+    title: "Send some positivity",
+    subtitle: "Write yourself an encouraging message for when you need it most",
+    starter: "Hey future me, I just wanted to remind you that ",
+  },
+  {
+    icon: "\u{1F4DD}",
+    title: "Life wishlist",
+    subtitle: "Where do you want to be in a year? Write it down and see how far you get",
+    starter: "In a year from now, I'd love to:\n\n- ",
+  },
+  {
+    icon: "\u{1F4AA}",
+    title: "Celebrate your wins",
+    subtitle: "Write about what you're proud of right now so future you remembers",
+    starter: "Future me, I want you to remember that right now I'm proud of myself for ",
+  },
+  {
+    icon: "\u{1F4AC}",
+    title: "Advice for future you",
+    subtitle: "What wisdom would you share with yourself a year from now?",
+    starter: "Dear future me, here's some advice from the person you used to be:\n\n",
+  },
+  {
+    icon: "\u{1F30D}",
+    title: "Gratitude snapshot",
+    subtitle: "Capture what you're grateful for today and revisit it later",
+    starter: "Right now, I'm grateful for:\n\n1. ",
+  },
+];
+
 export default function ComposeScreen() {
   const insets = useSafeAreaInsets();
   const queryClient = useQueryClient();
@@ -35,9 +81,9 @@ export default function ComposeScreen() {
   } else {
     deliveryDate.setFullYear(deliveryDate.getFullYear() + 1);
   }
-  const formattedDelivery = deliveryDate.toLocaleDateString("en-US", {
-    month: "short",
+  const formattedDelivery = deliveryDate.toLocaleDateString("en-GB", {
     day: "numeric",
+    month: "short",
     year: "numeric",
   });
 
@@ -60,6 +106,13 @@ export default function ComposeScreen() {
       setIsSending(false);
     }
   };
+
+  const handlePromptTap = (starter: string) => {
+    setContent(starter);
+    if (Platform.OS !== "web") Haptics.selectionAsync();
+  };
+
+  const showPrompts = content.trim().length === 0;
 
   return (
     <KeyboardAvoidingView
@@ -129,21 +182,52 @@ export default function ComposeScreen() {
         keyboardDismissMode="interactive"
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.previewBubble}>
-          <TextInput
-            style={styles.textInput}
-            placeholder="Type a message to future you..."
-            placeholderTextColor="rgba(255,255,255,0.55)"
-            multiline
-            textAlignVertical="top"
-            maxLength={5000}
-            value={content}
-            onChangeText={setContent}
-            autoFocus
-          />
-        </View>
-        {content.length > 0 && (
-          <Text style={styles.charCount}>{content.length} / 5,000</Text>
+        {showPrompts && (
+          <View style={styles.promptsSection}>
+            <Text style={styles.promptsHeading}>Need inspiration?</Text>
+            <Text style={styles.promptsSubheading}>
+              Tap an idea to get started
+            </Text>
+            <View style={styles.promptsGrid}>
+              {PROMPTS.map((prompt, i) => (
+                <Pressable
+                  key={i}
+                  onPress={() => handlePromptTap(prompt.starter)}
+                  style={({ pressed }) => [
+                    styles.promptCard,
+                    pressed && styles.promptCardPressed,
+                  ]}
+                >
+                  <Text style={styles.promptIcon}>{prompt.icon}</Text>
+                  <View style={styles.promptTextWrap}>
+                    <Text style={styles.promptTitle}>{prompt.title}</Text>
+                    <Text style={styles.promptSubtitle}>{prompt.subtitle}</Text>
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {!showPrompts && (
+          <>
+            <View style={styles.previewBubble}>
+              <TextInput
+                style={styles.textInput}
+                placeholder="Type a message to future you..."
+                placeholderTextColor="rgba(255,255,255,0.55)"
+                multiline
+                textAlignVertical="top"
+                maxLength={5000}
+                value={content}
+                onChangeText={setContent}
+                autoFocus
+              />
+            </View>
+            {content.length > 0 && (
+              <Text style={styles.charCount}>{content.length} / 5,000</Text>
+            )}
+          </>
         )}
       </ScrollView>
 
@@ -256,6 +340,56 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: 8,
+  },
+  promptsSection: {
+    paddingBottom: 16,
+  },
+  promptsHeading: {
+    fontSize: 18,
+    fontFamily: "Inter_600SemiBold",
+    color: Colors.light.text,
+    marginBottom: 4,
+  },
+  promptsSubheading: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textSecondary,
+    marginBottom: 16,
+  },
+  promptsGrid: {
+    gap: 10,
+  },
+  promptCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: Colors.light.card,
+    borderWidth: 1,
+    borderColor: Colors.light.border,
+    borderRadius: 14,
+    padding: 14,
+    gap: 12,
+  },
+  promptCardPressed: {
+    backgroundColor: Colors.light.tintLight,
+    borderColor: Colors.light.tint,
+  },
+  promptIcon: {
+    fontSize: 24,
+  },
+  promptTextWrap: {
+    flex: 1,
+  },
+  promptTitle: {
+    fontSize: 15,
+    fontFamily: "Inter_600SemiBold",
+    color: Colors.light.text,
+    marginBottom: 2,
+  },
+  promptSubtitle: {
+    fontSize: 13,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textSecondary,
+    lineHeight: 18,
   },
   previewBubble: {
     backgroundColor: Colors.light.tint,
