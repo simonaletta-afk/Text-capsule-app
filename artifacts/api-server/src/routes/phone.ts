@@ -1,6 +1,7 @@
 import { Router, type IRouter, type Request, type Response } from "express";
 import { db, usersTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { sendWhatsApp, sendSMS } from "../lib/twilio";
 
 const router: IRouter = Router();
 
@@ -49,6 +50,17 @@ router.post("/phone", async (req: Request, res: Response) => {
     .update(usersTable)
     .set({ phoneNumber: formatted, deliveryChannel: channel })
     .where(eq(usersTable.id, req.user.id));
+
+  const confirmMsg = "Welcome to Text Capsule! Your number is connected and ready to receive future messages.";
+  try {
+    if (channel === "whatsapp") {
+      await sendWhatsApp(formatted, confirmMsg);
+    } else {
+      await sendSMS(formatted, confirmMsg);
+    }
+  } catch (err: any) {
+    console.error("Confirmation message failed:", err?.message);
+  }
 
   res.json({ success: true, phoneNumber: formatted, deliveryChannel: channel });
 });
