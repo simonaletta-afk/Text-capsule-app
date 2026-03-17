@@ -10,7 +10,7 @@
         "image": "latest"
       },
       "env": {
-        "EXPO_PUBLIC_DOMAIN": "958af9b8-ee36-4555-804f-8efae2d17976-00-34tezo5s1ntmj.spock.replit.dev"
+        "EXPO_PUBLIC_DOMAIN": "future-message-timer.replit.app"
       }
     },
     "preview": {
@@ -19,15 +19,17 @@
         "image": "latest"
       },
       "env": {
-        "EXPO_PUBLIC_DOMAIN": "958af9b8-ee36-4555-804f-8efae2d17976-00-34tezo5s1ntmj.spock.replit.dev"
+        "EXPO_PUBLIC_DOMAIN": "future-message-timer.replit.app"
       }
     },
     "production": {
+      "autoSubmit": true,
       "ios": {
-        "image": "latest"
+        "image": "latest",
+        "autoSubmit": true
       },
       "env": {
-        "EXPO_PUBLIC_DOMAIN": "958af9b8-ee36-4555-804f-8efae2d17976-00-34tezo5s1ntmj.spock.replit.dev"
+        "EXPO_PUBLIC_DOMAIN": "future-message-timer.replit.app"
       }
     }
   },
