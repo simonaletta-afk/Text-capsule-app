@@ -1,26 +1,17 @@
 {
   "configVersion": 0,
   "apple": {
+    "copyright": "2026 Text Capsule",
     "info": {
       "en-GB": {
         "title": "Text Capsule",
         "subtitle": "Messages to your future self",
         "description": "Send a message to your future self and receive it in 6 months or a year via SMS or WhatsApp.\n\nText Capsule lets you write letters, set goals, send encouragement, and capture memories — then delivers them back to you when the time comes.\n\nFeatures:\n• Write messages with creative writing prompts\n• Choose delivery in 6 months or 1 year\n• Receive via SMS or WhatsApp\n• View your message history\n• Simple, beautiful chat-style interface\n\nWrite today. Receive tomorrow.",
         "keywords": ["time capsule", "future self", "messages", "letter", "goals", "motivation", "SMS", "WhatsApp", "reminders", "journal"],
-        "privacyPolicyUrl": "https://958af9b8-ee36-4555-804f-8efae2d17976-00-34tezo5s1ntmj.spock.replit.dev/api/privacy",
+        "promoText": "Send messages to your future self",
         "supportUrl": "https://958af9b8-ee36-4555-804f-8efae2d17976-00-34tezo5s1ntmj.spock.replit.dev/api/support",
-        "screenshots": {
-          "iphone67": [
-            "./assets/store/screenshots/iphone67/01-login.png",
-            "./assets/store/screenshots/iphone67/02-compose.png",
-            "./assets/store/screenshots/iphone67/03-messages.png",
-            "./assets/store/screenshots/iphone67/04-delivery.png",
-            "./assets/store/screenshots/iphone67/05-settings.png"
-          ]
-        }
+        "privacyPolicyUrl": "https://958af9b8-ee36-4555-804f-8efae2d17976-00-34tezo5s1ntmj.spock.replit.dev/api/privacy"
       }
-    },
-    "categories": ["LIFESTYLE", "SOCIAL_NETWORKING"],
-    "copyright": "2026 Text Capsule"
+    }
   }
 }
