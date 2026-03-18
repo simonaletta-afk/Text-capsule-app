@@ -1,7 +1,9 @@
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
+import React, { useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Platform,
   Pressable,
   ScrollView,
@@ -22,9 +24,53 @@ interface MenuItem {
   danger?: boolean;
 }
 
+function getApiBaseUrl(): string {
+  if (process.env.EXPO_PUBLIC_DOMAIN) {
+    return `https://${process.env.EXPO_PUBLIC_DOMAIN}`;
+  }
+  return "";
+}
+
 export default function SettingsScreen() {
   const insets = useSafeAreaInsets();
   const { user, logout } = useAuth();
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Delete Account",
+      "Are you sure you want to delete your account? This will permanently remove all your messages and data. This action cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete Account",
+          style: "destructive",
+          onPress: async () => {
+            setIsDeleting(true);
+            try {
+              const SecureStore = require("expo-secure-store");
+              const token = await SecureStore.getItemAsync("auth_session_token");
+              const apiBase = getApiBaseUrl();
+              const res = await fetch(`${apiBase}/api/auth/account`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              if (res.ok) {
+                await logout();
+                router.replace("/");
+              } else {
+                Alert.alert("Error", "Failed to delete account. Please try again.");
+              }
+            } catch {
+              Alert.alert("Error", "Something went wrong. Please try again.");
+            } finally {
+              setIsDeleting(false);
+            }
+          },
+        },
+      ],
+    );
+  };
 
   const menuItems: MenuItem[] = [
     {
@@ -115,6 +161,21 @@ export default function SettingsScreen() {
             </Pressable>
           ))}
         </View>
+
+        <Pressable
+          onPress={handleDeleteAccount}
+          disabled={isDeleting}
+          style={({ pressed }) => [
+            styles.deleteButton,
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          {isDeleting ? (
+            <ActivityIndicator size="small" color={Colors.light.danger} />
+          ) : (
+            <Text style={styles.deleteButtonText}>Delete Account</Text>
+          )}
+        </Pressable>
 
         <Text style={styles.version}>Text Capsule v1.0</Text>
       </ScrollView>
@@ -243,11 +304,21 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
     marginTop: 1,
   },
+  deleteButton: {
+    alignItems: "center",
+    paddingVertical: 14,
+    marginTop: 24,
+  },
+  deleteButtonText: {
+    fontSize: 14,
+    fontFamily: "Inter_500Medium",
+    color: Colors.light.danger,
+  },
   version: {
     fontSize: 12,
     fontFamily: "Inter_400Regular",
     color: Colors.light.textTertiary,
     textAlign: "center",
-    marginTop: 24,
+    marginTop: 16,
   },
 });
