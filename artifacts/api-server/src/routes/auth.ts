@@ -166,4 +166,25 @@ router.post("/auth/logout", async (req: Request, res: Response) => {
   res.json({ success: true });
 });
 
+router.delete("/auth/account", async (req: Request, res: Response) => {
+  if (!req.isAuthenticated()) {
+    res.status(401).json({ error: "Unauthorized" });
+    return;
+  }
+
+  try {
+    await db
+      .delete(usersTable)
+      .where(eq(usersTable.id, req.user.id));
+
+    const sid = getSessionId(req);
+    await clearSession(res, sid);
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("[AUTH] Failed to delete account:", err);
+    res.status(500).json({ error: "Failed to delete account" });
+  }
+});
+
 export default router;
