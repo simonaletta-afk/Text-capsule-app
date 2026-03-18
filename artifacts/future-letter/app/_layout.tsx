@@ -33,6 +33,7 @@ function RootLayoutNav() {
       <Stack.Screen name="support" />
       <Stack.Screen name="phone-setup" />
       <Stack.Screen name="paywall" options={{ presentation: "modal" }} />
+      <Stack.Screen name="forgot-password" />
     </Stack>
   );
 }
