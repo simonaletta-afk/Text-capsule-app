@@ -6,6 +6,7 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   Pressable,
@@ -13,6 +14,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  TouchableWithoutFeedback,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -144,8 +146,9 @@ export default function ComposeScreen() {
     <KeyboardAvoidingView
       style={[styles.container, { paddingTop: Platform.OS === "web" ? 67 : 0 }]}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
     >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <View style={styles.innerContainer}>
       <View style={[styles.modalHandle, Platform.OS === "web" && { marginTop: 8 }]}>
         <View style={styles.handleBar} />
       </View>
@@ -205,7 +208,7 @@ export default function ComposeScreen() {
       <ScrollView
         style={styles.chatArea}
         contentContainerStyle={styles.chatAreaContent}
-        keyboardDismissMode="interactive"
+        keyboardDismissMode="on-drag"
         keyboardShouldPersistTaps="handled"
       >
         {showPrompts && (
@@ -286,6 +289,8 @@ export default function ComposeScreen() {
           </Pressable>
         </View>
       )}
+        </View>
+      </TouchableWithoutFeedback>
 
       {showConfirmation && (
         <Animated.View style={[styles.confirmationOverlay, { opacity: fadeAnim }]}>
@@ -324,6 +329,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.light.background,
+  },
+  innerContainer: {
+    flex: 1,
   },
   modalHandle: {
     alignItems: "center",
