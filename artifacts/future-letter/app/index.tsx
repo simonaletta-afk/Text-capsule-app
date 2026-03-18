@@ -236,6 +236,12 @@ function LoginScreen() {
             )}
           </Pressable>
 
+          {!isSignup && (
+            <Pressable onPress={() => router.push("/forgot-password")}>
+              <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+            </Pressable>
+          )}
+
           <Pressable onPress={() => { setIsSignup(!isSignup); setError(null); }}>
             <Text style={styles.switchAuthText}>
               {isSignup ? "Already have an account? Log in" : "Don't have an account? Sign up"}
@@ -668,6 +674,13 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontFamily: "Inter_600SemiBold",
     color: "#fff",
+  },
+  forgotPasswordText: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textSecondary,
+    textAlign: "center",
+    marginTop: 12,
   },
   switchAuthText: {
     fontSize: 14,

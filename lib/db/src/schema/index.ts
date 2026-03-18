@@ -1,3 +1,4 @@
 export * from "./auth";
 export * from "./messages";
 export * from "./support";
+export * from "./password-reset";

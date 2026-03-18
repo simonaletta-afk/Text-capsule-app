@@ -103,6 +103,32 @@ export async function savePhoneNumber(phoneNumber: string, deliveryChannel: "wha
   }
 }
 
+export async function requestPasswordReset(email: string): Promise<void> {
+  const base = getApiBaseUrl();
+  const res = await fetch(`${base}/api/auth/forgot-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error || "Failed to request password reset");
+  }
+}
+
+export async function resetPassword(email: string, code: string, newPassword: string): Promise<void> {
+  const base = getApiBaseUrl();
+  const res = await fetch(`${base}/api/auth/reset-password`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, code, newPassword }),
+  });
+  if (!res.ok) {
+    const data = await res.json();
+    throw new Error(data.error || "Failed to reset password");
+  }
+}
+
 export async function sendSupportMessage(subject: string, message: string): Promise<void> {
   const base = getApiBaseUrl();
   const headers = await getAuthHeaders();
