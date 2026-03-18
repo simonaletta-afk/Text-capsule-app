@@ -30,6 +30,10 @@ export default function PaywallScreen() {
   const hasLivePackages = displayPackages.length > 0;
 
   const handlePurchase = async () => {
+    if (!hasLivePackages) {
+      setError("Subscriptions are being set up. Please try again shortly.");
+      return;
+    }
     const pkg = displayPackages[selectedIndex];
     if (!pkg) return;
     setError(null);
@@ -172,7 +176,7 @@ export default function PaywallScreen() {
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 16) }]}>
         <Pressable
           onPress={handlePurchase}
-          disabled={isPurchasing || displayPackages.length === 0}
+          disabled={isPurchasing}
           style={({ pressed }) => [
             styles.purchaseButton,
             pressed && { opacity: 0.85 },
