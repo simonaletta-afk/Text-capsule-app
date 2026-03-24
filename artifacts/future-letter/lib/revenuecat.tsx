@@ -1,6 +1,6 @@
 import React, { createContext, useContext } from "react";
 import { Platform } from "react-native";
-import Purchases from "react-native-purchases";
+import Purchases, { PurchasesStoreProduct } from "react-native-purchases";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 const REVENUECAT_IOS_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY;
@@ -8,6 +8,8 @@ const REVENUECAT_IOS_API_KEY = process.env.EXPO_PUBLIC_REVENUECAT_IOS_API_KEY;
 export const REVENUECAT_ENTITLEMENT_IDENTIFIER = "pro";
 
 const FREE_MESSAGE_LIMIT = 2;
+
+const PRODUCT_IDS = ["capsule_pro_monthly", "capsule_pro_yearly"];
 
 function getRevenueCatApiKey() {
   if (!REVENUECAT_IOS_API_KEY) {
@@ -45,9 +47,26 @@ function useSubscriptionContext() {
     staleTime: 300 * 1000,
   });
 
+  const productsQuery = useQuery({
+    queryKey: ["revenuecat", "products"],
+    queryFn: async () => {
+      const products = await Purchases.getProducts(PRODUCT_IDS);
+      return products;
+    },
+    staleTime: 300 * 1000,
+  });
+
   const purchaseMutation = useMutation({
     mutationFn: async (packageToPurchase: any) => {
       const { customerInfo } = await Purchases.purchasePackage(packageToPurchase);
+      return customerInfo;
+    },
+    onSuccess: () => customerInfoQuery.refetch(),
+  });
+
+  const purchaseProductMutation = useMutation({
+    mutationFn: async (product: PurchasesStoreProduct) => {
+      const { customerInfo } = await Purchases.purchaseStoreProduct(product);
       return customerInfo;
     },
     onSuccess: () => customerInfoQuery.refetch(),
@@ -66,11 +85,13 @@ function useSubscriptionContext() {
   return {
     customerInfo: customerInfoQuery.data,
     offerings: offeringsQuery.data,
+    products: productsQuery.data ?? [],
     isSubscribed,
     isLoading: customerInfoQuery.isLoading || offeringsQuery.isLoading,
     purchase: purchaseMutation.mutateAsync,
+    purchaseProduct: purchaseProductMutation.mutateAsync,
     restore: restoreMutation.mutateAsync,
-    isPurchasing: purchaseMutation.isPending,
+    isPurchasing: purchaseMutation.isPending || purchaseProductMutation.isPending,
     isRestoring: restoreMutation.isPending,
     freeMessageLimit: FREE_MESSAGE_LIMIT,
   };

@@ -17,28 +17,49 @@ import { useSubscription } from "@/lib/revenuecat";
 
 export default function PaywallScreen() {
   const insets = useSafeAreaInsets();
-  const { offerings, purchase, restore, isPurchasing, isRestoring } = useSubscription();
+  const {
+    offerings,
+    products,
+    purchase,
+    purchaseProduct,
+    restore,
+    isPurchasing,
+    isRestoring,
+  } = useSubscription();
   const [selectedIndex, setSelectedIndex] = useState(1);
   const [error, setError] = useState<string | null>(null);
 
   const currentOffering = offerings?.current;
   const packages = currentOffering?.availablePackages ?? [];
-
   const monthlyPkg = packages.find((p) => p.packageType === "MONTHLY");
   const annualPkg = packages.find((p) => p.packageType === "ANNUAL");
   const displayPackages = [monthlyPkg, annualPkg].filter(Boolean);
   const hasLivePackages = displayPackages.length > 0;
 
+  const monthlyProduct = products.find(
+    (p) => p.identifier === "capsule_pro_monthly"
+  );
+  const yearlyProduct = products.find(
+    (p) => p.identifier === "capsule_pro_yearly"
+  );
+  const displayProducts = [monthlyProduct, yearlyProduct].filter(Boolean);
+  const hasDirectProducts = displayProducts.length > 0;
+
   const handlePurchase = async () => {
-    if (!hasLivePackages) {
-      setError("Subscriptions are being set up. Please try again shortly.");
-      return;
-    }
-    const pkg = displayPackages[selectedIndex];
-    if (!pkg) return;
     setError(null);
     try {
-      await purchase(pkg);
+      if (hasLivePackages) {
+        const pkg = displayPackages[selectedIndex];
+        if (!pkg) return;
+        await purchase(pkg);
+      } else if (hasDirectProducts) {
+        const product = displayProducts[selectedIndex];
+        if (!product) return;
+        await purchaseProduct(product);
+      } else {
+        setError("Unable to load subscriptions. Please try again later.");
+        return;
+      }
       router.back();
     } catch (e: any) {
       if (e.userCancelled) return;
@@ -62,6 +83,18 @@ export default function PaywallScreen() {
     { icon: "star" as const, text: "Priority SMS delivery" },
     { icon: "heart" as const, text: "Support indie development" },
   ];
+
+  const getMonthlyPrice = () => {
+    if (monthlyPkg) return monthlyPkg.product.priceString;
+    if (monthlyProduct) return monthlyProduct.priceString;
+    return "$1.99";
+  };
+
+  const getYearlyPrice = () => {
+    if (annualPkg) return annualPkg.product.priceString;
+    if (yearlyProduct) return yearlyProduct.priceString;
+    return "$12.99";
+  };
 
   return (
     <View style={[styles.container, { paddingTop: Platform.OS === "web" ? 20 : insets.top }]}>
@@ -92,75 +125,43 @@ export default function PaywallScreen() {
         </View>
 
         <View style={styles.packagesRow}>
-          {hasLivePackages ? (
-            displayPackages.map((pkg, i) => {
-              if (!pkg) return null;
-              const isSelected = i === selectedIndex;
-              const isAnnual = pkg.packageType === "ANNUAL";
-              return (
-                <Pressable
-                  key={pkg.identifier}
-                  onPress={() => setSelectedIndex(i)}
-                  style={[styles.packageCard, isSelected && styles.packageCardSelected]}
-                >
-                  {isAnnual && (
-                    <View style={styles.saveBadge}>
-                      <Text style={styles.saveBadgeText}>BEST VALUE</Text>
-                    </View>
-                  )}
-                  <Text style={[styles.packageLabel, isSelected && styles.packageLabelSelected]}>
-                    {isAnnual ? "Yearly" : "Monthly"}
-                  </Text>
-                  <Text style={[styles.packagePrice, isSelected && styles.packagePriceSelected]}>
-                    {pkg.product.priceString}
-                  </Text>
-                  <Text style={[styles.packagePeriod, isSelected && styles.packagePeriodSelected]}>
-                    {isAnnual ? "/year" : "/month"}
-                  </Text>
-                </Pressable>
-              );
-            })
-          ) : (
-            <>
-              <Pressable
-                onPress={() => setSelectedIndex(0)}
-                style={[styles.packageCard, selectedIndex === 0 && styles.packageCardSelected]}
-              >
-                <Text style={[styles.packageLabel, selectedIndex === 0 && styles.packageLabelSelected]}>
-                  Monthly
-                </Text>
-                <Text style={[styles.packagePrice, selectedIndex === 0 && styles.packagePriceSelected]}>
-                  $1.99
-                </Text>
-                <Text style={[styles.packagePeriod, selectedIndex === 0 && styles.packagePeriodSelected]}>
-                  /month
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => setSelectedIndex(1)}
-                style={[styles.packageCard, selectedIndex === 1 && styles.packageCardSelected]}
-              >
-                <View style={styles.saveBadge}>
-                  <Text style={styles.saveBadgeText}>BEST VALUE</Text>
-                </View>
-                <Text style={[styles.packageLabel, selectedIndex === 1 && styles.packageLabelSelected]}>
-                  Yearly
-                </Text>
-                <Text style={[styles.packagePrice, selectedIndex === 1 && styles.packagePriceSelected]}>
-                  $12.99
-                </Text>
-                <Text style={[styles.packagePeriod, selectedIndex === 1 && styles.packagePeriodSelected]}>
-                  /year
-                </Text>
-              </Pressable>
-            </>
-          )}
+          <Pressable
+            onPress={() => setSelectedIndex(0)}
+            style={[styles.packageCard, selectedIndex === 0 && styles.packageCardSelected]}
+          >
+            <Text style={[styles.packageLabel, selectedIndex === 0 && styles.packageLabelSelected]}>
+              Monthly
+            </Text>
+            <Text style={[styles.packagePrice, selectedIndex === 0 && styles.packagePriceSelected]}>
+              {getMonthlyPrice()}
+            </Text>
+            <Text style={[styles.packagePeriod, selectedIndex === 0 && styles.packagePeriodSelected]}>
+              /month
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setSelectedIndex(1)}
+            style={[styles.packageCard, selectedIndex === 1 && styles.packageCardSelected]}
+          >
+            <View style={styles.saveBadge}>
+              <Text style={styles.saveBadgeText}>BEST VALUE</Text>
+            </View>
+            <Text style={[styles.packageLabel, selectedIndex === 1 && styles.packageLabelSelected]}>
+              Yearly
+            </Text>
+            <Text style={[styles.packagePrice, selectedIndex === 1 && styles.packagePriceSelected]}>
+              {getYearlyPrice()}
+            </Text>
+            <Text style={[styles.packagePeriod, selectedIndex === 1 && styles.packagePeriodSelected]}>
+              /year
+            </Text>
+          </Pressable>
         </View>
 
         <Text style={styles.termsText}>
           {selectedIndex === 1
-            ? "Yearly subscription at $12.99/year — that's just $1.08/month. "
-            : "Monthly subscription at $1.99/month. "}
+            ? `Yearly subscription at ${getYearlyPrice()}/year. `
+            : `Monthly subscription at ${getMonthlyPrice()}/month. `}
           Cancel anytime. Payment will be charged to your Apple ID account at confirmation of purchase.
           Subscription automatically renews unless cancelled at least 24 hours before the end of the current period.
         </Text>
