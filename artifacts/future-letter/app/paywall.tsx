@@ -25,6 +25,7 @@ export default function PaywallScreen() {
     restore,
     isPurchasing,
     isRestoring,
+    isLoading,
   } = useSubscription();
   const [selectedIndex, setSelectedIndex] = useState(1);
   const [error, setError] = useState<string | null>(null);
@@ -45,24 +46,33 @@ export default function PaywallScreen() {
   const displayProducts = [monthlyProduct, yearlyProduct].filter(Boolean);
   const hasDirectProducts = displayProducts.length > 0;
 
+  const canPurchase = hasLivePackages || hasDirectProducts;
+
   const handlePurchase = async () => {
     setError(null);
     try {
       if (hasLivePackages) {
         const pkg = displayPackages[selectedIndex];
-        if (!pkg) return;
+        if (!pkg) {
+          setError("Please select a plan.");
+          return;
+        }
         await purchase(pkg);
       } else if (hasDirectProducts) {
         const product = displayProducts[selectedIndex];
-        if (!product) return;
+        if (!product) {
+          setError("Please select a plan.");
+          return;
+        }
         await purchaseProduct(product);
       } else {
-        setError("Unable to load subscriptions. Please try again later.");
+        setError("Unable to load subscriptions. Please check your connection and try again.");
         return;
       }
       router.back();
     } catch (e: any) {
       if (e.userCancelled) return;
+      console.error("Purchase error:", e);
       setError(e.message || "Purchase failed. Please try again.");
     }
   };
@@ -124,39 +134,46 @@ export default function PaywallScreen() {
           ))}
         </View>
 
-        <View style={styles.packagesRow}>
-          <Pressable
-            onPress={() => setSelectedIndex(0)}
-            style={[styles.packageCard, selectedIndex === 0 && styles.packageCardSelected]}
-          >
-            <Text style={[styles.packageLabel, selectedIndex === 0 && styles.packageLabelSelected]}>
-              Monthly
-            </Text>
-            <Text style={[styles.packagePrice, selectedIndex === 0 && styles.packagePriceSelected]}>
-              {getMonthlyPrice()}
-            </Text>
-            <Text style={[styles.packagePeriod, selectedIndex === 0 && styles.packagePeriodSelected]}>
-              /month
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setSelectedIndex(1)}
-            style={[styles.packageCard, selectedIndex === 1 && styles.packageCardSelected]}
-          >
-            <View style={styles.saveBadge}>
-              <Text style={styles.saveBadgeText}>BEST VALUE</Text>
-            </View>
-            <Text style={[styles.packageLabel, selectedIndex === 1 && styles.packageLabelSelected]}>
-              Yearly
-            </Text>
-            <Text style={[styles.packagePrice, selectedIndex === 1 && styles.packagePriceSelected]}>
-              {getYearlyPrice()}
-            </Text>
-            <Text style={[styles.packagePeriod, selectedIndex === 1 && styles.packagePeriodSelected]}>
-              /year
-            </Text>
-          </Pressable>
-        </View>
+        {isLoading && !canPurchase ? (
+          <View style={styles.loadingRow}>
+            <ActivityIndicator size="small" color={Colors.light.tint} />
+            <Text style={styles.loadingText}>Loading subscription options...</Text>
+          </View>
+        ) : (
+          <View style={styles.packagesRow}>
+            <Pressable
+              onPress={() => setSelectedIndex(0)}
+              style={[styles.packageCard, selectedIndex === 0 && styles.packageCardSelected]}
+            >
+              <Text style={[styles.packageLabel, selectedIndex === 0 && styles.packageLabelSelected]}>
+                Monthly
+              </Text>
+              <Text style={[styles.packagePrice, selectedIndex === 0 && styles.packagePriceSelected]}>
+                {getMonthlyPrice()}
+              </Text>
+              <Text style={[styles.packagePeriod, selectedIndex === 0 && styles.packagePeriodSelected]}>
+                /month
+              </Text>
+            </Pressable>
+            <Pressable
+              onPress={() => setSelectedIndex(1)}
+              style={[styles.packageCard, selectedIndex === 1 && styles.packageCardSelected]}
+            >
+              <View style={styles.saveBadge}>
+                <Text style={styles.saveBadgeText}>BEST VALUE</Text>
+              </View>
+              <Text style={[styles.packageLabel, selectedIndex === 1 && styles.packageLabelSelected]}>
+                Yearly
+              </Text>
+              <Text style={[styles.packagePrice, selectedIndex === 1 && styles.packagePriceSelected]}>
+                {getYearlyPrice()}
+              </Text>
+              <Text style={[styles.packagePeriod, selectedIndex === 1 && styles.packagePeriodSelected]}>
+                /year
+              </Text>
+            </Pressable>
+          </View>
+        )}
 
         <Text style={styles.termsText}>
           {selectedIndex === 1
@@ -278,6 +295,17 @@ const styles = StyleSheet.create({
     fontFamily: "Inter_500Medium",
     color: Colors.light.text,
     flex: 1,
+  },
+  loadingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 30,
+  },
+  loadingText: {
+    fontSize: 14,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textSecondary,
   },
   packagesRow: {
     flexDirection: "row",
