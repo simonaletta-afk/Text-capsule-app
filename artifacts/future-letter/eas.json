@@ -27,7 +27,8 @@
         "image": "latest"
       },
       "env": {
-        "EXPO_PUBLIC_DOMAIN": "future-message-timer.replit.app"
+        "EXPO_PUBLIC_DOMAIN": "future-message-timer.replit.app",
+        "EXPO_PUBLIC_REVENUECAT_IOS_API_KEY": "appl_BKginBTlaQFwYzQHBGrREzwSWAg"
       }
     }
   },
