@@ -34,8 +34,6 @@ export default function PaywallScreen() {
   const packages = currentOffering?.availablePackages ?? [];
   const monthlyPkg = packages.find((p) => p.packageType === "MONTHLY");
   const annualPkg = packages.find((p) => p.packageType === "ANNUAL");
-  const displayPackages = [monthlyPkg, annualPkg].filter(Boolean);
-  const hasLivePackages = displayPackages.length > 0;
 
   const monthlyProduct = products.find(
     (p) => p.identifier === "capsule_pro_monthly"
@@ -43,33 +41,32 @@ export default function PaywallScreen() {
   const yearlyProduct = products.find(
     (p) => p.identifier === "capsule_pro_yearly"
   );
-  const displayProducts = [monthlyProduct, yearlyProduct].filter(Boolean);
-  const hasDirectProducts = displayProducts.length > 0;
 
-  const canPurchase = hasLivePackages || hasDirectProducts;
+  const canPurchase =
+    !!monthlyPkg || !!annualPkg || !!monthlyProduct || !!yearlyProduct;
 
   const handlePurchase = async () => {
     setError(null);
+    const isYearly = selectedIndex === 1;
+
     try {
-      if (hasLivePackages) {
-        const pkg = displayPackages[selectedIndex];
-        if (!pkg) {
-          setError("Please select a plan.");
-          return;
-        }
+      const pkg = isYearly ? annualPkg : monthlyPkg;
+      if (pkg) {
         await purchase(pkg);
-      } else if (hasDirectProducts) {
-        const product = displayProducts[selectedIndex];
-        if (!product) {
-          setError("Please select a plan.");
-          return;
-        }
-        await purchaseProduct(product);
-      } else {
-        setError("Unable to load subscriptions. Please check your connection and try again.");
+        router.back();
         return;
       }
-      router.back();
+
+      const product = isYearly ? yearlyProduct : monthlyProduct;
+      if (product) {
+        await purchaseProduct(product);
+        router.back();
+        return;
+      }
+
+      setError(
+        "Unable to load subscriptions. Please check your connection and try again."
+      );
     } catch (e: any) {
       if (e.userCancelled) return;
       console.error("Purchase error:", e);
