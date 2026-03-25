@@ -11,6 +11,8 @@ const FREE_MESSAGE_LIMIT = 2;
 
 const PRODUCT_IDS = ["capsule_pro_monthly", "capsule_pro_yearly"];
 
+let revenueCatConfigured = false;
+
 function getRevenueCatApiKey() {
   if (!REVENUECAT_IOS_API_KEY) {
     console.warn("RevenueCat API key not found, subscription features disabled");
@@ -20,40 +22,67 @@ function getRevenueCatApiKey() {
 }
 
 export function initializeRevenueCat() {
+  if (Platform.OS === "web") return;
   const apiKey = getRevenueCatApiKey();
   if (!apiKey) return;
 
-  Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
-  Purchases.configure({ apiKey });
-  console.log("Configured RevenueCat");
+  try {
+    Purchases.setLogLevel(Purchases.LOG_LEVEL.DEBUG);
+    Purchases.configure({ apiKey });
+    revenueCatConfigured = true;
+    console.log("Configured RevenueCat");
+  } catch (e) {
+    console.error("Failed to configure RevenueCat:", e);
+  }
 }
 
 function useSubscriptionContext() {
+  const isNative = Platform.OS !== "web";
+
   const customerInfoQuery = useQuery({
     queryKey: ["revenuecat", "customer-info"],
     queryFn: async () => {
+      if (!revenueCatConfigured) return null;
       const info = await Purchases.getCustomerInfo();
       return info;
     },
     staleTime: 60 * 1000,
+    retry: 2,
+    enabled: isNative,
   });
 
   const offeringsQuery = useQuery({
     queryKey: ["revenuecat", "offerings"],
     queryFn: async () => {
+      if (!revenueCatConfigured) return null;
       const offerings = await Purchases.getOfferings();
+      console.log("Offerings loaded:", JSON.stringify(offerings?.current?.availablePackages?.length ?? 0), "packages");
       return offerings;
     },
     staleTime: 300 * 1000,
+    retry: 2,
+    enabled: isNative,
   });
 
   const productsQuery = useQuery({
     queryKey: ["revenuecat", "products"],
     queryFn: async () => {
-      const products = await Purchases.getProducts(PRODUCT_IDS);
-      return products;
+      if (!revenueCatConfigured) return [];
+      try {
+        const products = await Purchases.getProducts(
+          PRODUCT_IDS,
+          Purchases.PRODUCT_CATEGORY.SUBSCRIPTION
+        );
+        console.log("Products loaded directly:", products.length, products.map(p => p.identifier));
+        return products;
+      } catch (e) {
+        console.error("Failed to fetch products directly:", e);
+        return [];
+      }
     },
     staleTime: 300 * 1000,
+    retry: 3,
+    enabled: isNative,
   });
 
   const purchaseMutation = useMutation({
@@ -80,14 +109,14 @@ function useSubscriptionContext() {
   });
 
   const isSubscribed =
-    customerInfoQuery.data?.entitlements.active?.[REVENUECAT_ENTITLEMENT_IDENTIFIER] !== undefined;
+    customerInfoQuery.data?.entitlements?.active?.[REVENUECAT_ENTITLEMENT_IDENTIFIER] !== undefined;
 
   return {
     customerInfo: customerInfoQuery.data,
     offerings: offeringsQuery.data,
     products: productsQuery.data ?? [],
     isSubscribed,
-    isLoading: customerInfoQuery.isLoading || offeringsQuery.isLoading,
+    isLoading: customerInfoQuery.isLoading || offeringsQuery.isLoading || productsQuery.isLoading,
     purchase: purchaseMutation.mutateAsync,
     purchaseProduct: purchaseProductMutation.mutateAsync,
     restore: restoreMutation.mutateAsync,
