@@ -26,6 +26,7 @@ export default function PaywallScreen() {
     isPurchasing,
     isRestoring,
     isLoading,
+    debugInfo,
   } = useSubscription();
   const [selectedIndex, setSelectedIndex] = useState(1);
   const [error, setError] = useState<string | null>(null);
@@ -185,6 +186,12 @@ export default function PaywallScreen() {
             <Feather name="alert-circle" size={14} color={Colors.light.danger} />
             <Text style={styles.errorText}>{error}</Text>
           </View>
+        )}
+
+        {!canPurchase && !isLoading && (
+          <Text style={styles.debugText}>
+            {`Key: ${debugInfo.hasApiKey ? "yes" : "no"} | Native: ${debugInfo.isNative ? "yes" : "no"} | Ready: ${debugInfo.rcReady ? "yes" : "no"}\nOfferings: ${debugInfo.packagesCount} pkgs | Products: ${debugInfo.productsCount}\n${debugInfo.offeringsError ? "OErr: " + debugInfo.offeringsError : ""}${debugInfo.productsError ? "PErr: " + debugInfo.productsError : ""}`}
+          </Text>
         )}
       </ScrollView>
 
@@ -370,6 +377,14 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     marginBottom: 8,
     paddingHorizontal: 4,
+  },
+  debugText: {
+    fontSize: 11,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textTertiary,
+    textAlign: "center",
+    marginTop: 12,
+    lineHeight: 16,
   },
   errorRow: {
     flexDirection: "row",
