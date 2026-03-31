@@ -91,6 +91,11 @@ export default function SettingsScreen() {
       onPress: () => router.push("/privacy"),
     },
     {
+      icon: "file-text",
+      label: "Terms of Use",
+      onPress: () => router.push("/terms"),
+    },
+    {
       icon: "log-out",
       label: "Log Out",
       onPress: async () => {

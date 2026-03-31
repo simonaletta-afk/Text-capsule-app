@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.simonaletta.textcapsule",
-      "buildNumber": "13"
+      "buildNumber": "14"
     },
     "android": {
       "package": "com.simonaletta.textcapsule"

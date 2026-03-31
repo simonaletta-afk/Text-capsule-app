@@ -211,6 +211,16 @@ export default function PaywallScreen() {
             {isRestoring ? "Restoring..." : "Restore Purchases"}
           </Text>
         </Pressable>
+
+        <View style={styles.legalLinks}>
+          <Pressable onPress={() => router.push("/terms")}>
+            <Text style={styles.legalLinkText}>Terms of Use</Text>
+          </Pressable>
+          <Text style={styles.legalSeparator}>|</Text>
+          <Pressable onPress={() => router.push("/privacy")}>
+            <Text style={styles.legalLinkText}>Privacy Policy</Text>
+          </Pressable>
+        </View>
       </View>
     </View>
   );
@@ -409,6 +419,22 @@ const styles = StyleSheet.create({
   restoreText: {
     fontSize: 13,
     fontFamily: "Inter_400Regular",
+    color: Colors.light.textTertiary,
+  },
+  legalLinks: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginTop: 4,
+  },
+  legalLinkText: {
+    fontSize: 12,
+    fontFamily: "Inter_400Regular",
+    color: Colors.light.textTertiary,
+    textDecorationLine: "underline",
+  },
+  legalSeparator: {
+    fontSize: 12,
     color: Colors.light.textTertiary,
   },
 });
